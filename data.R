@@ -25,7 +25,8 @@
 
 # The object contains the following functions (for now)
 #  - Grow
-#  - Survive
+#  V Survive (age based)
+#  - Reproduction
 #######################
 
 ####################################################
@@ -114,10 +115,25 @@ setMethod("Age","Leprechaun",function(Object){
 	return(Object)
 })
 
+# Growth // Sizes change, this fact is known by many - if not all
+setGeneric("Grow",function(Object){standardGeneric("Grow")})
+
+setMethod("Grow","Leprechaun",function(Object){
+	Object@size<-Object@size*runif(1,1,1.2)
+	return(Object)
+})
+
+# Retrieving the sex of an individual
+setGeneric("Sex",function(Object){standardGeneric("Sex")})
+
+setMethod("Sex","Leprechaun",function(Object){
+	return(Object@sex)
+})
+
 
 ############### Creating an initial population with 10 individuals
 pop<-c(new("Leprechaun"))
-for(i in 2:100){
+for(i in 2:10){
 	pop<-c(pop,new("Leprechaun"))
 }
 
@@ -131,14 +147,31 @@ for(YR in 1:10){
 	#### Survival
 	for(i in ALIVE){
 		pop[[i]]<-Surv(pop[[i]])
-		pop[[i]]<-Age(pop[[i]])
-		cat(i,"\t")
 	}
 	
+	#### Age+1 and growth
+	for(i in ALIVE){
+		pop[[i]]<-Age(pop[[i]])
+		pop[[i]]<-Grow(pop[[i]])	
+	}
 	
-	#### Growth
+	#### Reproduction  ### Not the most easy part (...)
+	
+	##########
+	### Part dedicated to retrieving the indices of all living males and of all living females
+	##########
+	males<-lapply(pop,Sex)=="M" # Determine which individuals are males -- logicaly all other individuals should be females... However, this includes dead ones... Simply a list of T,T,F,F,T,F,F,....
+	females<-which(!males) # Get the indices of the non-males (that is females..)
+	males<-which(males)   # Get the indices of the males
+	females<-intersect(females,ALIVE) # Retrieve the indices of the living(!) females
+	males <-intersect(males,ALIVE) # Retrieve the indises of the living males
 	
 	
-	#### Reproduction
+	##########
+	# Part dedicated to breeding..  ~ But now it is weekend instead!
+	##########
+	
+	
+	### Everything should be written to a dataframe, to make sure we have all the values for ever and ever
 		
 }
