@@ -1,3 +1,18 @@
+cat("\014")
+
+setwd(dir="C:/Users/Thimothee Admin/Documents/thesis/Transitions Life Histories/CppCodeSimul/")
+library(lme4)
+
+NormalROracle<-as.data.frame(matrix(data=NA,nrow=0,ncol=61))
+names(NormalROracle)<-c("SamplingSeed","PoissonSimulNumber","NeutralSimulNumber","AdultSurvival","JuvenileSurvival","IndVarSurv","IndVarRepro"
+                        ,"CorReproSurv","MeanRepro","AgeMax","StudyLength","IndInCohort"
+                        ,"SSLRTreject","RRLRTreject","ViS2.5%","ViS50%","ViS97.5%","ViR2.5%","ViR50%","ViR97.5%"
+                        ,"SurvReproreject","SurvAgereject","ReproAgereject","PluriReproreject"
+                        ,"SR2.5%","SR50%","SR97.5%","SA2.5%","SA50%","SA97.5%","RA2.5%","RA50%","RA97.5%","PR2.5%","PR50%","PR97.5%"
+                        ,"RQ2.5%","RQ50%","RQ97.5%","SQ2.5%","SQ50%","SQ97.5%","ReproQreject","SurvQreject"
+                        ,"ReproQR2_2.5%","ReproQR2_50%","ReproQR2_97.5%","SurvQR2_2.5%","SurvQR2_50%","SurvQR2_97.5%"
+                        ,"SRQR2.5%","SRQR50%","SRQR97.5%","SRQS2.5%","SRQS50%","SRQS97.5%","SRQRreject","SRQSreject"
+                        ,"SRQR2_2.5%","SRQR2_50%","SRQR2_97.5%")
 ##### In this file we will try to come up with some things ####
 ###############################################################
 
