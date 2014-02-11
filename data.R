@@ -8,26 +8,63 @@
 #######################
 
 #######################
-# Main object "Leprechaun": an individual of our species of interest, the Irish Leprechaun, small in size, but with great powers. To make it more French for Timothee, we assume that their favourite food is camembert.
-#
+# Main object "Leprechaun": an individual of our species of interest, the Irish Leprechaun, small in size, but with great powers. To make it more French for Timothee, we assume that their favourite food is camembert. Leprechaun is not very choosy, and mates completely random.
+##########################################
+
 # The object contains the following values
 
 # Static [these numbers do not change after initialisation]
-#  V ID (unique identifier number)																	[integer]
-#  V pID (two numbers referring to the parents of the Leprechaun, if none: NA)						[vector of two integers]
-#  V Year of birth (timestep at which the individual was born)										[integer]
-#  - Genome (?) (two vectors of length N coding for both chromosomes of N loci in the genome.)		[two vectors of N integers]
+#  V ID (unique identifier number) [integer]
+#  V pID (two numbers referring to the parents of the Leprechaun, if none: NA) [vector of two integers]
+#  V Year of birth (timestep at which the individual was born)	[integer]
+#  - Genome (?) (two vectors of length N coding for both chromosomes of N loci in the genome.) [two vectors of N integers]
+#  - Sex (M/F)
+#  - Heritable phenotypic trait value of interest (z) (e.g. birth weight) (changes/constant through life depending on trait)
+#  - (Possibly: breeding value A)
 
 # Dynamic [these numbers do change after initialisation]
-#  V alive (boolean, true/false)																	[boolean]
-#  V age (timesteps since birth)																	[integer]
-#  V size																							[double]
+#  V alive (boolean, true/false) [boolean]
+#  V age (a) (timesteps since birth) [integer]
+#  - stage (possibly instead of/in addition to age) (juvenile, adult, etc)
+#  V size (x)
 
-# The object contains the following functions (for now)
-#  - Grow
-#  V Survive (age based)
-#  - Reproduction
-#######################
+####################
+###### Relations that need to be defined between size (x), age (a), trait (z) and vital rates
+# (- Possibly include population density d in functions)
+# V Survival(a,x,z,d) (logistic function) 
+# - Growth (a,x,z,d) (either transition probability to next stage or absolute growth)
+# - Reproduction probability: p_repr(a,x,z,d) (logistic function)
+# - Number of offspring: n_offspring(a,x,z,d) (poisson distribution)
+# - Offspring size x distribution: x_offspring(x_mother,z_mother,x_father,z_father) (not required if working with stages) (prability density function)
+# - Offspring trait z distribution: z_offspring(x_mother,z_mother,x_father,z_father,A_mother,A_father) + rnorm(0,V_E) (prability density function)
+
+####################
+####### Environmental aspects
+# - Extra variation in z due to unexplained factors (i.e. V_E)) (assumed constant over time and constant accross all individuals)
+# - Changes in the environment affecting survival(x,z), growth(x,z), p_repr(x,z), n_offspring(x,z), f_offspring(x_mother,z_mother) (i.e. changing selection)
+
+########################
+########## 'Settings' of ancestral population from which simulation can start:
+# - n start individuals
+# - Start trait z distribution
+# - Start age (/stage) distribution
+# - Assign sexes to individuals
+# - (Possibly: start a values)
+
+########## Perform in each time step the following actions over all alive individuals at t=0
+## In following order:
+# survival(x,z)
+### For those who survive:
+# growth(x,z)
+# p_repr(x,z)
+### For those who reproduce:
+# Random mating between all reproductive males and females
+# n_offspring(x,z)
+# x_offspring(x_mother,z_mother,x_father,z_father)
+# z_offspring(x_mother,z_mother,x_father,z_father,a_mother,a_father,m) + rnorm(0,V_E)
+# Random sex assigned to offspring
+# Offspring added to population
+### End of timestep
 
 ####################################################
 ################ GLOBAL VARIABLES AND COUNTERS #####
