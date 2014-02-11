@@ -1,4 +1,3 @@
-
 #####################################################
 ### Overview of what we want to do/include/model ####
 ############## in our simulated dataset. ############
@@ -51,3 +50,4 @@
 # Random sex assigned to offspring
 # Offspring added to population
 ### End of timestep
+
