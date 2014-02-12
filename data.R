@@ -24,8 +24,8 @@
 #  - Explicit coding of traits by many independent diploid loci. The simplest model: z = mean + sum_loci(a1_locus + a2_locus) + environment. One can add explicit dominance and epistasis, as well as interactions with environment. 
 #  - A possibility is to draw the a of the different alleles from a N(0,V). Each locus can have a different V, and thus a different importance. 
 #  - A large number of loci (>20) will give easily patterns expected from quantitative genetics. We can draw randomly the number of loci per trait. 
-#  - My main concern at the moment is the initialisation of the genetic diversity: it will be hard to avoid a fast decline of diversity at the beginning.
-#  - We probably do not need mutations.
+#  - My main concern at the moment is the initialisation of the genetic diversity: it will be hard to avoid a fast decline of diversity at the beginning. One possibility is using neutral expectations of diversity (n-coalescent or Ewens distribution)
+#  - We probably do not need mutations if we consider a population over no more than some tens of generations.
 #  - Sex (M/F). Could be genetically determined by on locus, thus allowing random fluctuations of sex ratio and thus population structure.
 
 # Dynamic [these numbers do change after initialisation]
@@ -129,6 +129,53 @@ setMethod("initialize","Leprechaun",function(.Object,parent1,parent2){
 
 ################### Definition of more biologically relevant methods (e.g. survival)
 ####################################################################################
+
+#### A simple proposal for initialization of genotypic effects
+nbLoci<-10
+nbAlleles<-10
+gvalues<-array(data=NA,dim=c(nbLoci,nbAlleles,nbAlleles),dimnames=list(paste("L",1:nbLoci,sep=""),paste("A",1: nbAlleles,sep=""),paste("A",1: nbAlleles,sep="")))
+for(L in 1:nbLoci)
+{
+  effect<-abs(rnorm(n=1,mean=0,sd=1))# alter the locus importance in a realistic way (many small-effect loci, few major loci)
+  dominance<-1 # we could set it to zero if we want additive effects only, or make it varying depending on loci
+  overdominance<-0 # we can make it non nul to allow for overdominance
+  for(A in 1:nbAlleles)
+  {
+    gvalues[L,A,A]<-2*rnorm(n=1,mean=0,sd=effect)# two times the additive effect
+    
+  }
+  for(A in 1:nbAlleles)
+  {
+    for (D in 1:nbAlleles)
+    {
+      if (D!=A)
+      {
+        d<-dominance*runif(n=1,min=-0.5-overdominance,max=0.5+overdominance)
+        gvalues[L,A,D]<-(0.5-d)*gvalues[L,A,A]+(0.5+d)*gvalues[L,D,D] # mean of additive effects + dominance
+        
+      }
+    }
+  }
+}
+
+nbIndividuals<-100
+meanInds<-vector(length=nbIndividuals) # just a basic draw of individual genotypic values
+for (beast in 1:nbIndividuals)
+{
+  ind<-vector(length=0)
+  for (L in 1:nbLoci)
+  {
+    allele1<-floor(runif(n=1,min=1,max=nbAlleles+1))
+    allele2<-floor(runif(n=1,min=1,max=nbAlleles+1))
+    ind<-c(ind,gvalues[L,allele1,allele2])
+  }
+  meanInds[beast]<-mean(ind)
+}
+plot(meanInds) # and a visualisation of it
+mean(meanInds)
+var(meanInds)
+####################################################
+
 
 # Implementing the famous bathtub, ages 1 to 20
 bathtub<-function(age){
