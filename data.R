@@ -130,30 +130,28 @@ setMethod("initialize","Leprechaun",function(.Object,parent1,parent2){
 ################### Definition of more biologically relevant methods (e.g. survival)
 ####################################################################################
 
-#### A simple proposal for initialization of genotypic effects
-nbLoci<-10
-nbAlleles<-10
+#### A simple proposal for initialization of genotypic effects on one trait
+nbLoci<-10 #number of loci controling the trait phenotype
+nbAlleles<-10 #number of existing alleles per loci
 gvalues<-array(data=NA,dim=c(nbLoci,nbAlleles,nbAlleles),dimnames=list(paste("L",1:nbLoci,sep=""),paste("A",1: nbAlleles,sep=""),paste("A",1: nbAlleles,sep="")))
 for(L in 1:nbLoci)
 {
   effect<-abs(rnorm(n=1,mean=0,sd=1))# alter the locus importance in a realistic way (many small-effect loci, few major loci)
   dominance<-1 # we could set it to zero if we want additive effects only, or make it varying depending on loci
   overdominance<-0 # we can make it non nul to allow for overdominance
-  for(A in 1:nbAlleles)
+  
+  for(A in 1:nbAlleles)# loop for diagonal = genetic value of homozygotes (only additive effects)
   {
     gvalues[L,A,A]<-2*rnorm(n=1,mean=0,sd=effect)# two times the additive effect
     
   }
-  for(A in 1:nbAlleles)
+  for(A in 1:(nbAlleles-1))# loop for off-diagonal = heterozygotes (additive and dominance effects)
   {
-    for (D in 1:nbAlleles)
+    for (D in (A+1):nbAlleles)
     {
-      if (D!=A)
-      {
-        d<-dominance*runif(n=1,min=-0.5-overdominance,max=0.5+overdominance)
-        gvalues[L,A,D]<-(0.5-d)*gvalues[L,A,A]+(0.5+d)*gvalues[L,D,D] # mean of additive effects + dominance
-        
-      }
+      d<-dominance*runif(n=1,min=-0.5-overdominance,max=0.5+overdominance)
+      gvalues[L,A,D]<-(0.5-d)*gvalues[L,A,A]+(0.5+d)*gvalues[L,D,D] # mean of additive effects + dominance, over diagonal
+      gvalues[L,D,A]<-(0.5-d)*gvalues[L,A,A]+(0.5+d)*gvalues[L,D,D] # the same below diagonal    
     }
   }
 }
