@@ -132,19 +132,25 @@ setMethod("initialize","Leprechaun",function(.Object,parent1,parent2){
 
 #### A simple proposal for initialization of genotypic effects on one trait
 set.seed(10)
+
+#### Setting the parameters
+dominance<-1 # we could set it to zero if we want additive effects only, or make it varying depending on loci
+overdominance<-0 # we can make it non nul to allow for overdominance
+
 nbLoci<-10 #number of loci controling the trait phenotype
 nbAlleles<-10 #number of existing alleles per loci
-gvalues<-array(data=NA,dim=c(nbLoci,nbAlleles,nbAlleles),dimnames=list(paste("L",1:nbLoci,sep=""),paste("A",1: nbAlleles,sep=""),paste("A",1: nbAlleles,sep="")))
 
-  effect<-abs(rnorm(n=nbloci,mean=0,sd=1))# alter the locus importance in a realistic way (many small-effect loci, few major loci)
-  dominance<-1 # we could set it to zero if we want additive effects only, or make it varying depending on loci
-  overdominance<-0 # we can make it non nul to allow for overdominance
-gvalues[L,1:dim(gvalues)[1],1:dim(gvalues)[1]]<-2*rnorm(n=dim(gvalues)[1],mean=0,sd=effect)
+gvalues<-array(data=NA,dim=c(nbLoci,nbAlleles,nbAlleles),dimnames=list(paste("L",1:nbLoci,sep=""),paste("A",1: nbAlleles,sep=""),paste("A",1: nbAlleles,sep=""))) # Initialising a matrix that will contain the genotypic effects on the/a trait
+
+  	
 for(L in 1:nbLoci)
 {
-  
-  
+	# Setting the effects for the homozygotes [all loci]
+  	effect<-abs(rnorm(n=1,mean=0,sd=1))# alter the locus importance in a realistic way (many small-effect loci, few major loci)
+	diag(gvalues[L,,])<-2*rnorm(n=dim(gvalues)[1],mean=0,sd=effect)
 
+	
+	# Setting the effects for the heterozygotes
   for(A in 1:(nbAlleles-1))# loop for off-diagonal = heterozygotes (additive and dominance effects)
   {
     for (D in (A+1):nbAlleles)
