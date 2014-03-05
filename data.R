@@ -97,7 +97,8 @@ setClass(
 		Birth = "integer",
 		alive = "logical",
 		size = "numeric",
-		sex = "character"
+		sex = "character",
+		DNA = "matrix"
 	)
 
 )
@@ -111,8 +112,23 @@ setMethod("show","Leprechaun",
 )
 
 setMethod("initialize","Leprechaun",function(.Object,parent1,parent2){
-	if(missing(parent1)){parent1<-NA; weight1<-5+2*runif(1)}else{weight1<-pop[[parent1]]@size}
-	if(missing(parent2)){parent2<-NA; weight2<-5+2*runif(1)}else{weight2<-pop[[parent2]]@size}
+	.Object@DNA<-matrix(NA,nrow=2,ncol=nbLoci)
+	if(missing(parent1)){
+		parent1<-NA
+		weight1<-5+2*runif(1)
+		.Object@DNA[1,]<-floor(runif(nbLoci,min=1,max=nbAlleles+1))
+	}else{
+			weight1<-pop[[parent1]]@size
+			.Object@DNA[1,]<-pop[[parent1]]@DNA[cbind(floor(runif(n=nbLoci,min=1,max=3)),1:nbLoci)]
+	}
+	if(missing(parent2)){
+		parent2<-NA
+		weight2<-5+2*runif(1)
+		.Object@DNA[2,]<-floor(runif(nbLoci,min=1,max=nbAlleles+1))
+	}else{
+		weight2<-pop[[parent2]]@size
+		.Object@DNA[2,]<-pop[[parent2]]@DNA[cbind(floor(runif(n=nbLoci,min=1,max=3)),1:nbLoci)]
+	}
 	.Object@age<-as.integer(0)
 	.Object@ID<-CID
 	.Object@pID<-c(as.integer(parent1),as.integer(parent2))
@@ -225,7 +241,12 @@ setMethod("Sex","Leprechaun",function(Object){
 	return(Object@sex)
 })
 
+# Calculating the number of offspring for a females
+setGeneric("Num_off",function(Object){standardGeneric("Num_off")})
 
+setMethod("Num_off","Leprechaun",function(Object){
+	return(2)
+})
 ############### Creating an initial population with 10 individuals
 pop<-c(new("Leprechaun"))
 for(i in 2:10){
@@ -238,7 +259,8 @@ ALIVE<-1:length(pop)
 ############### The start of time
 for(YR in 1:10){
 	cat("\nAt the beginning of year:",YR,"\nThere are:",length(ALIVE),"Leprechauns\n-----------------\n")
-	
+	cat(ALIVE,"\n")
+	cat(CID,"\n")
 	#### Survival
 	for(i in ALIVE){
 		pop[[i]]<-Surv(pop[[i]])
@@ -250,7 +272,7 @@ for(YR in 1:10){
 		pop[[i]]<-Grow(pop[[i]])	
 	}
 	
-	#### Reproduction  ### Not the most easy part (...)
+	#### Reproduction  ### Not the easiest part (but necessary if we want to allow the population to grow)
 	
 	##########
 	### Part dedicated to retrieving the indices of all living males and of all living females
@@ -260,13 +282,29 @@ for(YR in 1:10){
 	males<-which(males)   # Get the indices of the males
 	females<-intersect(females,ALIVE) # Retrieve the indices of the living(!) females
 	males <-intersect(males,ALIVE) # Retrieve the indises of the living males
-	
+	#cat(females)
 	
 	##########
-	# Part dedicated to breeding..  ~ But now it is weekend instead!
+	# Part dedicated to breeding.. 
 	##########
 	
-	
+	# We take a female based approach: we determine for each females 
+	from<-CID-1
+	for(i in females){
+		Noffs<-Num_off(pop[[i]])
+		if(Noffs>0 & length(males>0)){
+			#Determine the father
+			fat<-sample(males,1)
+			for(j in 1:Noffs){
+				#cat(j,"\n")
+				# Create the offspring
+				pop<-c(pop,new("Leprechaun",parent1=i,parent2=fat))
+			}
+		}		
+	}
+	if(from!=CID-1){
+	ALIVE<-c(ALIVE,(from+1):(CID-1))
+	}
 	### Everything should be written to a dataframe, to make sure we have all the values for ever and ever
 		
 }
