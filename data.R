@@ -289,7 +289,7 @@ for(YR in 1:10){
 	##########
 	
 	# We take a female based approach: we determine for each females 
-	from<-CID-1
+	from<-CID
 	for(i in females){
 		Noffs<-Num_off(pop[[i]])
 		if(Noffs>0 & length(males>0)){
@@ -302,8 +302,8 @@ for(YR in 1:10){
 			}
 		}		
 	}
-	if(from!=CID-1){
-	ALIVE<-c(ALIVE,(from+1):(CID-1))
+	if(from!=CID){
+	ALIVE<-c(ALIVE,(from):(CID-1))
 	}
 	### Everything should be written to a dataframe, to make sure we have all the values for ever and ever
 		
