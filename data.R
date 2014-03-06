@@ -256,6 +256,9 @@ for(i in 2:10){
 ############### List of living individuals [their indices], this will save time later, because dead individuals are not looped over
 ALIVE<-1:length(pop)
 
+filename<-"pop.csv"
+cat("t\tID\tz\ts\tage\tp1\tp2",file=filename,append=FALSE)
+
 ############### The start of time
 for(YR in 1:10){
 	cat("\nAt the beginning of year:",YR,"\nThere are:",length(ALIVE),"Leprechauns\n-----------------\n")
@@ -306,5 +309,7 @@ for(YR in 1:10){
 	ALIVE<-c(ALIVE,(from):(CID-1))
 	}
 	### Everything should be written to a dataframe, to make sure we have all the values for ever and ever
-		
+	for(i in ALIVE){
+	cat("\n",YR,"\t",pop[[i]]@ID,"\t",pop[[i]]@size,"\t",pop[[i]]@sex,"\t",pop[[i]]@age,"\t",pop[[i]]@pID[1],"\t",pop[[i]]@pID[2],file=filename,append=TRUE)
+	}
 }
