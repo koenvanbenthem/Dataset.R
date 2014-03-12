@@ -77,12 +77,61 @@
 ################ GLOBAL VARIABLES AND COUNTERS #####
 ####################################################
 
+################ Random seed #######################
+set.seed(12)
+
 ################ Counter for the IDs ###############
 CID<-as.integer(1) 
 
 
 ################ Counter for the current year ######
 YR<-0 
+
+################ Base population parameters ########
+
+MeanBirthSize<-10
+lowBoundGrowth<-1 # minimal growth rate
+highBoundGrowth<-1.2 # maximal growth rate
+meanGrowth<-mean(runif(10000,lowBoundGrowth,highBoundGrowth)) # needed to make survival ~ size relative on age
+MeanRepro<-2
+
+
+############### Genetic determinism ################
+dominance<-1 # for additive effects only, must be 0
+overdominance<-0 # non-null values generate overdominance
+
+nbLoci<-10 #number of loci controling the trait phenotype
+nbAlleles<-10 #number of existing alleles per loci
+
+gvalues<-array(data=NA,dim=c(nbAlleles,nbAlleles,nbLoci),dimnames=list(paste("A",1: nbAlleles,sep=""),paste("A",1: nbAlleles,sep=""),paste("L",1:nbLoci,sep=""))) # Initialising a matrix that will contain the genotypic effects on the/a trait
+
+for(L in 1:nbLoci)
+{
+  # Setting the effects for the homozygotes [all loci]
+  effect<-abs(rnorm(n=1,mean=0,sd=1))# alter the locus importance in a realistic way (many small-effect loci, few major loci)
+  diag(gvalues[,,L])<-2*rnorm(n=dim(gvalues)[1],mean=0,sd=effect)
+  
+  
+  # Setting the effects for the heterozygotes
+  for(A in 1:(nbAlleles-1))# loop for off-diagonal = heterozygotes (additive and dominance effects)
+  {
+    for (D in (A+1):nbAlleles)
+    {
+      d<-dominance*runif(n=1,min=-0.5-overdominance,max=0.5+overdominance)
+      gvalues[A,D,L]<-(0.5-d)*gvalues[A,A,L]+(0.5+d)*gvalues[D,D,L] # mean of additive effects + dominance, over diagonal
+      gvalues[D,A,L]<-(0.5-d)*gvalues[A,A,L]+(0.5+d)*gvalues[D,D,L] # the same below diagonal    
+    }
+  }
+}
+############### Selection parameters ###############
+SurvivalSelection1<-0.1 #linear coefficient on a logit scale for Survival ~ ... + size +size^2
+SurvivalSelection2<-(-0.02) #quadratic coefficient on a logit scale for Survival ~ ... + size + size^2; negative value=balancing selection
+
+fertilitySelection1<-0.1 #linear coefficient on a log scale for reproduction ~ ... + size + size^2
+fertilitySelection2<-(-0.01) #quadratic coefficient on a log scale for reproduction ~ ... + size + size^2; negative value=balancing selection
+
+####################################################
+
 
 ####################################################
 ############### Definition of the class ############
@@ -115,7 +164,7 @@ setMethod("initialize","Leprechaun",function(.Object,parent1,parent2){
 	.Object@DNA<-matrix(NA,nrow=2,ncol=nbLoci)
 	if(missing(parent1)){
 		parent1<-NA
-		weight1<-5+2*runif(1)
+		#weight1<-MeanBirthSize+2*runif(1)
 		.Object@DNA[1,]<-floor(runif(nbLoci,min=1,max=nbAlleles+1))
 	}else{
 			weight1<-pop[[parent1]]@size
@@ -123,10 +172,10 @@ setMethod("initialize","Leprechaun",function(.Object,parent1,parent2){
 	}
 	if(missing(parent2)){
 		parent2<-NA
-		weight2<-5+2*runif(1)
+		#weight2<-MeanBirthSize+2*runif(1)
 		.Object@DNA[2,]<-floor(runif(nbLoci,min=1,max=nbAlleles+1))
 	}else{
-		weight2<-pop[[parent2]]@size
+		#weight2<-pop[[parent2]]@size
 		.Object@DNA[2,]<-pop[[parent2]]@DNA[cbind(floor(runif(n=nbLoci,min=1,max=3)),1:nbLoci)]
 	}
 	.Object@age<-as.integer(0)
@@ -134,8 +183,14 @@ setMethod("initialize","Leprechaun",function(.Object,parent1,parent2){
 	.Object@pID<-c(as.integer(parent1),as.integer(parent2))
 	.Object@Birth<-as.integer(YR)
 	.Object@alive<-TRUE
-	.Object@size<-0.5*weight1+0.5*weight2
-
+	#.Object@size<-0.5*weight1+0.5*weight2
+  size<-MeanBirthSize
+  for (Locus in 1:nbLoci)#take the mean of genetic values
+    {
+      size<-size+(gvalues[ .Object@DNA[1,Locus], .Object@DNA[2,Locus], Locus]/nbLoci)
+    }
+  .Object@size<-size
+  
 	if(runif(1)>0.5){.Object@sex<-'F'}else{.Object@sex<-'M'}
 
 	CID<<-as.integer(CID+1)
@@ -143,65 +198,27 @@ setMethod("initialize","Leprechaun",function(.Object,parent1,parent2){
 	return(.Object)
 })
 
+
 ################### Definition of more biologically relevant methods (e.g. survival)
 ####################################################################################
 
-#### A simple proposal for initialization of genotypic effects on one trait
-set.seed(10)
-
-#### Setting the parameters
-dominance<-1 # we could set it to zero if we want additive effects only, or make it varying depending on loci
-overdominance<-0 # we can make it non nul to allow for overdominance
-
-nbLoci<-10 #number of loci controling the trait phenotype
-nbAlleles<-10 #number of existing alleles per loci
-
-gvalues<-array(data=NA,dim=c(nbLoci,nbAlleles,nbAlleles),dimnames=list(paste("L",1:nbLoci,sep=""),paste("A",1: nbAlleles,sep=""),paste("A",1: nbAlleles,sep=""))) # Initialising a matrix that will contain the genotypic effects on the/a trait
-
-  	
-for(L in 1:nbLoci)
-{
-	# Setting the effects for the homozygotes [all loci]
-  	effect<-abs(rnorm(n=1,mean=0,sd=1))# alter the locus importance in a realistic way (many small-effect loci, few major loci)
-	diag(gvalues[L,,])<-2*rnorm(n=dim(gvalues)[1],mean=0,sd=effect)
-
-	
-	# Setting the effects for the heterozygotes
-  for(A in 1:(nbAlleles-1))# loop for off-diagonal = heterozygotes (additive and dominance effects)
-  {
-    for (D in (A+1):nbAlleles)
-    {
-      d<-dominance*runif(n=1,min=-0.5-overdominance,max=0.5+overdominance)
-      gvalues[L,A,D]<-(0.5-d)*gvalues[L,A,A]+(0.5+d)*gvalues[L,D,D] # mean of additive effects + dominance, over diagonal
-      gvalues[L,D,A]<-(0.5-d)*gvalues[L,A,A]+(0.5+d)*gvalues[L,D,D] # the same below diagonal    
-    }
-  }
-}
-
-nbIndividuals<-100
-meanInds<-vector(length=nbIndividuals) # just a basic draw of individual genotypic values
-for (beast in 1:nbIndividuals)
-{
-  ind<-vector(length=0)
-  for (L in 1:nbLoci)
-  {
-    allele1<-floor(runif(n=1,min=1,max=nbAlleles+1))
-    allele2<-floor(runif(n=1,min=1,max=nbAlleles+1))
-    ind<-c(ind,gvalues[L,allele1,allele2])
-  }
-  meanInds[beast]<-mean(ind)
-}
-plot(meanInds) # and a visualisation of it
-mean(meanInds)
-var(meanInds)
-####################################################
-
-
 # Implementing the famous bathtub, ages 1 to 20
-bathtub<-function(age){
-	p<-0.6*exp(-age/4)+(-1+exp(age*log(2)/20))
-	p[p>1]<-1
-	return(p)
+bathtub<-function(age,size){
+  p<-0.6*exp(-age/4)+(-1+exp(age*log(2)/20))
+  p[p>1]<-1
+  return(p)
+}
+
+# Incorporate the effect of size to the survival function
+sizeSurvival<-function(age,size){
+  sizedeviation<-size-(MeanBirthSize*meanGrowth^age)
+  p<-bathtub(age)
+  if(p<1)#because size does not prevent animals of maximal age to die out
+    {
+      plogit<-log(p/(1-p))
+      Philogit<-plogit-SurvivalSelection1*sizedeviation-SurvivalSelection2*sizedeviation^2
+      p<-exp(Philogit)/(1+exp(Philogit))
+    }
 }
 
 # Applying the bathtub in a surival function
@@ -209,7 +226,7 @@ setGeneric("Surv",function(Object){standardGeneric("Surv")})
 
 setMethod("Surv","Leprechaun",function(Object){
 	
-	if(runif(1)>bathtub(Object@age)){
+	if(runif(1)>sizeSurvival(Object@age,Object@size)){
 		Object@alive<-FALSE
 		ALIVE<<-ALIVE[ALIVE!=Object@ID]
 	}
@@ -230,7 +247,7 @@ setMethod("Age","Leprechaun",function(Object){
 setGeneric("Grow",function(Object){standardGeneric("Grow")})
 
 setMethod("Grow","Leprechaun",function(Object){
-	Object@size<-Object@size*runif(1,1,1.2)
+	Object@size<-Object@size*runif(1,lowBoundGrowth,highBoundGrowth)
 	return(Object)
 })
 
@@ -245,7 +262,10 @@ setMethod("Sex","Leprechaun",function(Object){
 setGeneric("Num_off",function(Object){standardGeneric("Num_off")})
 
 setMethod("Num_off","Leprechaun",function(Object){
-	return(2)
+  sizeDeviation<-Object@size-MeanBirthSize*meanGrowth^Object@age    
+  lambda<-exp(log(MeanRepro)+fertilitySelection1*sizeDeviation+fertilitySelection2*sizeDeviation^2)
+  repro<-rpois(n=1,lambda=lambda)
+	return(repro)
 })
 ############### Creating an initial population with 10 individuals
 pop<-c(new("Leprechaun"))
@@ -313,3 +333,4 @@ for(YR in 1:10){
 	cat("\n",YR,"\t",pop[[i]]@ID,"\t",pop[[i]]@size,"\t",pop[[i]]@sex,"\t",pop[[i]]@age,"\t",pop[[i]]@pID[1],"\t",pop[[i]]@pID[2],file=filename,append=TRUE)
 	}
 }
+
