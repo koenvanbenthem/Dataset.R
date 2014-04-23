@@ -91,9 +91,13 @@ YR<-0
 
 MeanBirthSize<-10
 lowBoundGrowth<-1 # minimal growth rate
-highBoundGrowth<-1.2 # maximal growth rate
+highBoundGrowth<-1.1 # maximal growth rate
 meanGrowth<-mean(runif(10000,lowBoundGrowth,highBoundGrowth)) # needed to make survival ~ size relative on age
 MeanRepro<-2
+
+################ Environmental parameters ##########
+MeanCamembert<-5000
+SDCamembert<-1000
 
 
 ############### Genetic determinism ################
@@ -130,6 +134,8 @@ SurvivalSelection2<-(-0.02) #quadratic coefficient on a logit scale for Survival
 fertilitySelection1<-0.1 #linear coefficient on a log scale for reproduction ~ ... + size + size^2
 fertilitySelection2<-(-0.01) #quadratic coefficient on a log scale for reproduction ~ ... + size + size^2; negative value=balancing selection
 
+camembertSelection<-0.1
+survivalPenaltyForRepro<-0
 ####################################################
 
 
@@ -146,6 +152,7 @@ setClass(
 		Birth = "integer",
 		alive = "logical",
 		size = "numeric",
+    camemberts = "integer",
 		sex = "character",
 		DNA = "matrix"
 	)
@@ -156,7 +163,7 @@ setClass(
 ###############################################################################################
 setMethod("show","Leprechaun",
 	function(object){
-		cat(object@ID,"\t",object@size,"\t",object@age,"\t",object@sex,"\t(",object@pID[1],",",object@pID[2],")\t",object@Birth,"\t",object@alive,"\n",sep="")
+		cat(object@ID,"\t",object@size,"\t",object@camemberts,"\t",object@age,"\t",object@sex,"\t(",object@pID[1],",",object@pID[2],")\t",object@Birth,"\t",object@alive,"\n",sep="")
 	}
 )
 
@@ -190,6 +197,7 @@ setMethod("initialize","Leprechaun",function(.Object,parent1,parent2){
       size<-size+(gvalues[ .Object@DNA[1,Locus], .Object@DNA[2,Locus], Locus]/nbLoci)
     }
   .Object@size<-size
+  .Object@camemberts<-as.integer(0)
   
 	if(runif(1)>0.5){.Object@sex<-'F'}else{.Object@sex<-'M'}
 
@@ -210,7 +218,7 @@ bathtub<-function(age,size){
 }
 
 # Incorporate the effect of size to the survival function
-sizeSurvival<-function(age,size){
+sizeSurvival<-function(age,size,camemberts){
   sizedeviation<-size-(MeanBirthSize*meanGrowth^age)
   p<-bathtub(age)
   if(p<1)#because size does not prevent animals of maximal age to die out
@@ -218,7 +226,12 @@ sizeSurvival<-function(age,size){
       plogit<-log(p/(1-p))
       Philogit<-plogit-SurvivalSelection1*sizedeviation-SurvivalSelection2*sizedeviation^2
       p<-exp(Philogit)/(1+exp(Philogit))
+      if(camemberts<100)
+        {
+          p<-p*(camemberts/100)
+        }
     }
+  return(p)
 }
 
 # Applying the bathtub in a surival function
@@ -226,7 +239,7 @@ setGeneric("Surv",function(Object){standardGeneric("Surv")})
 
 setMethod("Surv","Leprechaun",function(Object){
 	
-	if(runif(1)>sizeSurvival(Object@age,Object@size)){
+	if(runif(1)>sizeSurvival(Object@age,Object@size,Object@camemberts)){
 		Object@alive<-FALSE
 		ALIVE<<-ALIVE[ALIVE!=Object@ID]
 	}
@@ -251,11 +264,25 @@ setMethod("Grow","Leprechaun",function(Object){
 	return(Object)
 })
 
+# Retrieving the ID of an individual
+setGeneric("IDretrieve",function(Object){standardGeneric("IDretrieve")})
+
+setMethod("IDretrieve","Leprechaun",function(Object){
+  return(Object@ID)
+})
+
+# Retrieving the size of an individual
+setGeneric("Size",function(Object){standardGeneric("Size")})
+
+setMethod("Size","Leprechaun",function(Object){
+  return(Object@size)
+})
+
 # Retrieving the sex of an individual
 setGeneric("Sex",function(Object){standardGeneric("Sex")})
 
 setMethod("Sex","Leprechaun",function(Object){
-	return(Object@sex)
+  return(Object@sex)
 })
 
 # Calculating the number of offspring for a females
@@ -263,10 +290,20 @@ setGeneric("Num_off",function(Object){standardGeneric("Num_off")})
 
 setMethod("Num_off","Leprechaun",function(Object){
   sizeDeviation<-Object@size-MeanBirthSize*meanGrowth^Object@age    
-  lambda<-exp(log(MeanRepro)+fertilitySelection1*sizeDeviation+fertilitySelection2*sizeDeviation^2)
+  lambda<-exp(log(MeanRepro)+fertilitySelection1*sizeDeviation+fertilitySelection2*sizeDeviation^2+camembertSelection*(sqrt(Object@camemberts)-survivalPenaltyForRepro))
   repro<-rpois(n=1,lambda=lambda)
 	return(repro)
 })
+
+# Function for camembert attributions 
+setGeneric("Food",function(Object){standardGeneric("Food")})
+
+setMethod("Food","Leprechaun",function(Object){
+  Object@camemberts<-as.integer(podium[i])
+  return(Object)
+})
+
+
 ############### Creating an initial population with 10 individuals
 pop<-c(new("Leprechaun"))
 for(i in 2:10){
@@ -277,18 +314,30 @@ for(i in 2:10){
 ALIVE<-1:length(pop)
 
 filename<-"pop.csv"
-cat("t\tID\tz\ts\tage\tp1\tp2",file=filename,append=FALSE)
+cat("t\tID\tz\tC\ts\tage\tp1\tp2\tphi",file=filename,append=FALSE)
 
 ############### The start of time
-for(YR in 1:10){
+for(YR in 1:30){
+  camembert<-abs(round(rnorm(n=1,mean=MeanCamembert,sd=SDCamembert),digits=0)) # ressources for year YR
 	cat("\nAt the beginning of year:",YR,"\nThere are:",length(ALIVE),"Leprechauns\n-----------------\n")
-	cat(ALIVE,"\n")
-	cat(CID,"\n")
-	#### Survival
+	cat("ALIVE:",ALIVE,"\n")
+	cat("Current ID:",CID,"\n")
+  cat("\n-----------------\nThe camembert production is:",camembert,"\n")
+	#### Competition for ressources
+  SizesAlive<-as.numeric(lapply(pop,Size))[ALIVE]
+  #HunterQualities<-rep(x=1/length(ALIVE),length(ALIVE))# here completely random. prob can introduce quality for competition
+  HunterQualities<-exp(SizesAlive)/sum(exp(SizesAlive))# here larger individual have a strong advantage in the competition
+  podium<-table(sample(as.character(ALIVE),size=camembert,replace=T,prob=HunterQualities)) 
+  for(i in 1:length(podium)){
+    pop[[as.integer(names(podium))[i]]]<-Food(pop[[as.integer(names(podium))[i]]])
+  }
+  
+  #### Survival
+  FATUM<-ALIVE
 	for(i in ALIVE){
 		pop[[i]]<-Surv(pop[[i]])
 	}
-	
+	DEAD<-setdiff(FATUM,ALIVE)
 	#### Age+1 and growth
 	for(i in ALIVE){
 		pop[[i]]<-Age(pop[[i]])
@@ -325,12 +374,16 @@ for(YR in 1:10){
 			}
 		}		
 	}
+  
 	if(from!=CID){
 	ALIVE<-c(ALIVE,(from):(CID-1))
 	}
 	### Everything should be written to a dataframe, to make sure we have all the values for ever and ever
-	for(i in ALIVE){
-	cat("\n",YR,"\t",pop[[i]]@ID,"\t",pop[[i]]@size,"\t",pop[[i]]@sex,"\t",pop[[i]]@age,"\t",pop[[i]]@pID[1],"\t",pop[[i]]@pID[2],file=filename,append=TRUE)
-	}
+  for(i in ALIVE){
+    cat("\n",YR,"\t",pop[[i]]@ID,"\t",pop[[i]]@size,"\t",pop[[i]]@camemberts,"\t",pop[[i]]@sex,"\t",pop[[i]]@age,"\t",pop[[i]]@pID[1],"\t",pop[[i]]@pID[2],"\t",1,file=filename,append=TRUE)
+  }
+  for(i in DEAD){
+    cat("\n",YR,"\t",pop[[i]]@ID,"\t",pop[[i]]@size,"\t",pop[[i]]@camemberts,"\t",pop[[i]]@sex,"\t",pop[[i]]@age,"\t",pop[[i]]@pID[1],"\t",pop[[i]]@pID[2],"\t",0,file=filename,append=TRUE)
+  }
 }
 
