@@ -129,7 +129,7 @@ for(L in 1:nbLoci)
 }
 ############### Selection parameters ###############
 SurvivalSelection1<-0.1 #linear coefficient on a logit scale for Survival ~ ... + size +size^2
-SurvivalSelection2<-(-0.02) #quadratic coefficient on a logit scale for Survival ~ ... + size + size^2; negative value=balancing selection
+SurvivalSelection2<-(-0.01) #quadratic coefficient on a logit scale for Survival ~ ... + size + size^2; negative value=balancing selection
 
 fertilitySelection1<-0.1 #linear coefficient on a log scale for reproduction ~ ... + size + size^2
 fertilitySelection2<-(-0.01) #quadratic coefficient on a log scale for reproduction ~ ... + size + size^2; negative value=balancing selection
@@ -154,7 +154,9 @@ setClass(
 		size = "numeric",
     camemberts = "integer",
 		sex = "character",
-		DNA = "matrix"
+		DNA = "matrix",
+    bvs = "numeric",
+    ARS = "integer"
 	)
 
 )
@@ -191,13 +193,17 @@ setMethod("initialize","Leprechaun",function(.Object,parent1,parent2){
 	.Object@Birth<-as.integer(YR)
 	.Object@alive<-TRUE
 	#.Object@size<-0.5*weight1+0.5*weight2
-  size<-MeanBirthSize
+  BreedingValueSize<-0
   for (Locus in 1:nbLoci)#take the mean of genetic values
     {
-      size<-size+(gvalues[ .Object@DNA[1,Locus], .Object@DNA[2,Locus], Locus]/nbLoci)
+      BreedingValueSize<-BreedingValueSize+(gvalues[ .Object@DNA[1,Locus], .Object@DNA[2,Locus], Locus]/nbLoci)
     }
-  .Object@size<-size
+  .Object@bvs<-BreedingValueSize
+	size<-MeanBirthSize+BreedingValueSize
+  .Object@size<-rnorm(n=1,mean=size,sd=1)
   .Object@camemberts<-as.integer(0)
+  
+  .Object@ARS<-as.integer(0)#annual reproductive success
   
 	if(runif(1)>0.5){.Object@sex<-'F'}else{.Object@sex<-'M'}
 
@@ -292,7 +298,8 @@ setMethod("Num_off","Leprechaun",function(Object){
   sizeDeviation<-Object@size-MeanBirthSize*meanGrowth^Object@age    
   lambda<-exp(log(MeanRepro)+fertilitySelection1*sizeDeviation+fertilitySelection2*sizeDeviation^2+camembertSelection*(sqrt(Object@camemberts)-survivalPenaltyForRepro))
   repro<-rpois(n=1,lambda=lambda)
-	return(repro)
+  Object@ARS<-as.integer(repro)
+	return(Object)
 })
 
 # Function for camembert attributions 
@@ -314,7 +321,7 @@ for(i in 2:10){
 ALIVE<-1:length(pop)
 
 filename<-"pop.csv"
-cat("t\tID\tz\tC\ts\tage\tp1\tp2\tphi",file=filename,append=FALSE)
+cat("t\tID\tz\tbvs\tC\ts\tARS\tage\tp1\tp2\tphi",file=filename,append=FALSE)
 
 ############### The start of time
 for(YR in 1:30){
@@ -363,7 +370,8 @@ for(YR in 1:30){
 	# We take a female based approach: we determine for each females 
 	from<-CID
 	for(i in females){
-		Noffs<-Num_off(pop[[i]])
+		pop[[i]]<-Num_off(pop[[i]])
+    Noffs<-pop[[i]]@ARS
 		if(Noffs>0 & length(males>0)){
 			#Determine the father
 			fat<-sample(males,1)
@@ -380,10 +388,10 @@ for(YR in 1:30){
 	}
 	### Everything should be written to a dataframe, to make sure we have all the values for ever and ever
   for(i in ALIVE){
-    cat("\n",YR,"\t",pop[[i]]@ID,"\t",pop[[i]]@size,"\t",pop[[i]]@camemberts,"\t",pop[[i]]@sex,"\t",pop[[i]]@age,"\t",pop[[i]]@pID[1],"\t",pop[[i]]@pID[2],"\t",1,file=filename,append=TRUE)
+    cat("\n",YR,"\t",pop[[i]]@ID,"\t",pop[[i]]@size,"\t",pop[[i]]@bvs,"\t",pop[[i]]@camemberts,"\t",pop[[i]]@sex,"\t",pop[[i]]@ARS,"\t",pop[[i]]@age,"\t",pop[[i]]@pID[1],"\t",pop[[i]]@pID[2],"\t",1,file=filename,append=TRUE)
   }
   for(i in DEAD){
-    cat("\n",YR,"\t",pop[[i]]@ID,"\t",pop[[i]]@size,"\t",pop[[i]]@camemberts,"\t",pop[[i]]@sex,"\t",pop[[i]]@age,"\t",pop[[i]]@pID[1],"\t",pop[[i]]@pID[2],"\t",0,file=filename,append=TRUE)
+    cat("\n",YR,"\t",pop[[i]]@ID,"\t",pop[[i]]@size,"\t",pop[[i]]@bvs,"\t",pop[[i]]@camemberts,"\t",pop[[i]]@sex,"\t",pop[[i]]@ARS,"\t",pop[[i]]@age,"\t",pop[[i]]@pID[1],"\t",pop[[i]]@pID[2],"\t",0,file=filename,append=TRUE)
   }
 }
 
