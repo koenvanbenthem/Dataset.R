@@ -1,0 +1,380 @@
+\documentclass{article}\usepackage[]{graphicx}\usepackage[]{color}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+
+\begin{document}
+
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{dat}\hlkwb{<-}\hlkwd{read.table}\hlstd{(}\hlkwc{file}\hlstd{=}\hlstr{"pop.csv"}\hlstd{,}\hlkwc{header}\hlstd{=T)}
+\hlkwd{head}\hlstd{(dat,}\hlnum{5}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+##   t ID     z s age p1 p2
+## 1 1  1 10.86 M   1 NA NA
+## 2 1  2 10.25 F   1 NA NA
+## 3 1  3 11.73 M   1 NA NA
+## 4 1  4 11.96 F   1 NA NA
+## 5 1  5 10.87 F   1 NA NA
+\end{verbatim}
+\begin{alltt}
+\hlkwd{which}\hlstd{(}\hlopt{!}\hlstd{(}\hlkwd{min}\hlstd{(dat}\hlopt{$}\hlstd{ID)}\hlopt{:}\hlkwd{max}\hlstd{(dat}\hlopt{$}\hlstd{ID)}\hlopt{%in%}\hlstd{dat}\hlopt{$}\hlstd{ID))}
+\end{alltt}
+\begin{verbatim}
+## [1] 8
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{dat2}\hlkwb{<-}\hlstd{dat[,}\hlkwd{c}\hlstd{(}\hlstr{"ID"}\hlstd{,}\hlstr{"t"}\hlstd{,}\hlstr{"z"}\hlstd{)]}
+\hlkwd{library}\hlstd{(}\hlstr{'reshape'}\hlstd{)}
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: plyr\\\#\# \\\#\# Attaching package: 'reshape'\\\#\# \\\#\# The following objects are masked from 'package:plyr':\\\#\# \\\#\#\ \ \ \  rename, round\_any}}\begin{alltt}
+\hlstd{dat3}\hlkwb{<-}\hlkwd{reshape}\hlstd{(dat2,} \hlkwc{idvar} \hlstd{=} \hlstr{"ID"}\hlstd{,} \hlkwc{timevar} \hlstd{=} \hlstr{"t"}\hlstd{,} \hlkwc{direction} \hlstd{=} \hlstr{"wide"}\hlstd{)}
+\hlstd{temp}\hlkwb{<-}\hlstd{dat[,}\hlkwd{c}\hlstd{(}\hlopt{-}\hlnum{1}\hlstd{,}\hlopt{-}\hlnum{3}\hlstd{,}\hlopt{-}\hlnum{5}\hlstd{)]}
+\hlstd{temp}\hlkwb{<-}\hlstd{temp[}\hlopt{!}\hlkwd{duplicated}\hlstd{(temp),]}
+\hlstd{dat4}\hlkwb{<-}\hlkwd{merge}\hlstd{(dat3,temp,}\hlkwc{by}\hlstd{=}\hlstr{"ID"}\hlstd{)}
+\hlstd{dat4}
+\end{alltt}
+\begin{verbatim}
+##      ID    z.1    z.2    z.3   z.4    z.5    z.6    z.7
+## 1     1 10.860     NA     NA    NA     NA     NA     NA
+## 2     2 10.254 11.730     NA    NA     NA     NA     NA
+## 3     3 11.731 13.213     NA    NA     NA     NA     NA
+## 4     4 11.965 12.803     NA    NA     NA     NA     NA
+## 5     5 10.870 11.760     NA    NA     NA     NA     NA
+## 6     6 11.137 13.324 15.140 15.69     NA     NA     NA
+## 7     7 10.435 11.238     NA    NA     NA     NA     NA
+## 8     9 11.003 11.286     NA    NA     NA     NA     NA
+## 9    10 11.305     NA     NA    NA     NA     NA     NA
+## 10   11 10.413     NA     NA    NA     NA     NA     NA
+## 11   12 10.291 12.191     NA    NA     NA     NA     NA
+## 12   13 10.377 10.484     NA    NA     NA     NA     NA
+## 13   14  9.653     NA     NA    NA     NA     NA     NA
+## 14   15 10.167 12.032 12.337    NA     NA     NA     NA
+## 15   16  9.747     NA     NA    NA     NA     NA     NA
+## 16   17  9.898     NA     NA    NA     NA     NA     NA
+## 17   18 10.477 12.131     NA    NA     NA     NA     NA
+## 18   19 10.149     NA     NA    NA     NA     NA     NA
+## 19   20 10.154     NA     NA    NA     NA     NA     NA
+## 20   21 10.411     NA     NA    NA     NA     NA     NA
+## 21   22 10.581 12.457 13.511    NA     NA     NA     NA
+## 22   23     NA  9.117 10.001    NA     NA     NA     NA
+## 23   24     NA 10.597     NA    NA     NA     NA     NA
+## 24   25     NA 10.267     NA    NA     NA     NA     NA
+## 25   26     NA 10.274 11.275 13.24     NA     NA     NA
+## 26   27     NA 10.557     NA    NA     NA     NA     NA
+## 27   28     NA 10.472 11.156 12.23 14.148     NA     NA
+## 28   29     NA  9.377  9.571 11.02     NA     NA     NA
+## 29   30     NA 10.309 10.481    NA     NA     NA     NA
+## 30   31     NA 10.339 11.348    NA     NA     NA     NA
+## 31   32     NA 11.450 13.422 15.71 18.044 20.559     NA
+## 32   33     NA 11.304 12.336 14.09     NA     NA     NA
+## 33   34     NA 10.190 10.952 11.36     NA     NA     NA
+## 34   35     NA  9.980 11.039    NA     NA     NA     NA
+## 35   36     NA     NA 10.567 11.46 12.177     NA     NA
+## 36   37     NA     NA 10.452 10.62     NA     NA     NA
+## 37   38     NA     NA 10.422    NA     NA     NA     NA
+## 38   39     NA     NA  9.790 10.10 11.936     NA     NA
+## 39   40     NA     NA 10.580 12.66 14.827     NA     NA
+## 40   41     NA     NA 10.426 11.48 13.306     NA     NA
+## 41   42     NA     NA 10.095 11.28     NA     NA     NA
+## 42   43     NA     NA  9.762 10.49 12.394     NA     NA
+## 43   44     NA     NA     NA 10.40 12.445 13.706 14.364
+## 44   45     NA     NA     NA 10.30     NA     NA     NA
+## 45   46     NA     NA     NA 10.40     NA     NA     NA
+## 46   47     NA     NA     NA 10.41     NA     NA     NA
+## 47   48     NA     NA     NA 10.27 10.864     NA     NA
+## 48   49     NA     NA     NA 10.32 11.285 13.238 15.299
+## 49   50     NA     NA     NA 11.62     NA     NA     NA
+## 50   51     NA     NA     NA 10.51     NA     NA     NA
+## 51   52     NA     NA     NA 10.37 11.553 13.693     NA
+## 52   53     NA     NA     NA 10.13     NA     NA     NA
+## 53   54     NA     NA     NA 10.35     NA     NA     NA
+## 54   55     NA     NA     NA 10.18     NA     NA     NA
+## 55   56     NA     NA     NA    NA 10.486     NA     NA
+## 56   57     NA     NA     NA    NA 10.565 10.762 11.076
+## 57   58     NA     NA     NA    NA 10.850     NA     NA
+## 58   59     NA     NA     NA    NA 10.353     NA     NA
+## 59   60     NA     NA     NA    NA 10.216 10.612     NA
+## 60   61     NA     NA     NA    NA 10.759 11.404     NA
+## 61   62     NA     NA     NA    NA  9.947     NA     NA
+## 62   63     NA     NA     NA    NA  9.980 11.684     NA
+## 63   64     NA     NA     NA    NA 10.129 12.070     NA
+## 64   65     NA     NA     NA    NA 10.129 12.091 14.191
+## 65   66     NA     NA     NA    NA 10.407     NA     NA
+## 66   67     NA     NA     NA    NA  9.742 10.444     NA
+## 67   68     NA     NA     NA    NA 10.282 11.404 11.670
+## 68   69     NA     NA     NA    NA  9.772 10.330 11.630
+## 69   70     NA     NA     NA    NA  9.789     NA     NA
+## 70   71     NA     NA     NA    NA 10.295     NA     NA
+## 71   72     NA     NA     NA    NA 10.182 11.104 11.129
+## 72   73     NA     NA     NA    NA  9.973     NA     NA
+## 73   74     NA     NA     NA    NA  9.476  9.652 10.203
+## 74   75     NA     NA     NA    NA     NA 10.130     NA
+## 75   76     NA     NA     NA    NA     NA  9.664     NA
+## 76   77     NA     NA     NA    NA     NA 10.103     NA
+## 77   78     NA     NA     NA    NA     NA 10.099     NA
+## 78   79     NA     NA     NA    NA     NA  9.907     NA
+## 79   80     NA     NA     NA    NA     NA 10.288 10.546
+## 80   81     NA     NA     NA    NA     NA 10.389     NA
+## 81   82     NA     NA     NA    NA     NA 10.568     NA
+## 82   83     NA     NA     NA    NA     NA 10.127 12.087
+## 83   84     NA     NA     NA    NA     NA 10.341     NA
+## 84   85     NA     NA     NA    NA     NA 10.612 11.902
+## 85   86     NA     NA     NA    NA     NA  9.783     NA
+## 86   87     NA     NA     NA    NA     NA 10.549     NA
+## 87   88     NA     NA     NA    NA     NA 10.727 11.184
+## 88   89     NA     NA     NA    NA     NA 10.406 10.630
+## 89   90     NA     NA     NA    NA     NA 10.459 11.139
+## 90   91     NA     NA     NA    NA     NA 10.037 11.386
+## 91   92     NA     NA     NA    NA     NA  9.892 11.242
+## 92   93     NA     NA     NA    NA     NA  9.751 10.230
+## 93   94     NA     NA     NA    NA     NA  9.819 10.733
+## 94   95     NA     NA     NA    NA     NA  9.839  9.937
+## 95   96     NA     NA     NA    NA     NA     NA 10.335
+## 96   97     NA     NA     NA    NA     NA     NA 10.516
+## 97   98     NA     NA     NA    NA     NA     NA 10.290
+## 98   99     NA     NA     NA    NA     NA     NA 10.155
+## 99  100     NA     NA     NA    NA     NA     NA 10.477
+## 100 101     NA     NA     NA    NA     NA     NA 10.417
+## 101 102     NA     NA     NA    NA     NA     NA 10.010
+## 102 103     NA     NA     NA    NA     NA     NA 10.465
+## 103 104     NA     NA     NA    NA     NA     NA     NA
+## 104 105     NA     NA     NA    NA     NA     NA     NA
+## 105 106     NA     NA     NA    NA     NA     NA     NA
+## 106 107     NA     NA     NA    NA     NA     NA     NA
+## 107 108     NA     NA     NA    NA     NA     NA     NA
+## 108 109     NA     NA     NA    NA     NA     NA     NA
+## 109 110     NA     NA     NA    NA     NA     NA     NA
+## 110 111     NA     NA     NA    NA     NA     NA     NA
+## 111 112     NA     NA     NA    NA     NA     NA     NA
+## 112 113     NA     NA     NA    NA     NA     NA     NA
+## 113 114     NA     NA     NA    NA     NA     NA     NA
+## 114 115     NA     NA     NA    NA     NA     NA     NA
+## 115 116     NA     NA     NA    NA     NA     NA     NA
+## 116 117     NA     NA     NA    NA     NA     NA     NA
+## 117 118     NA     NA     NA    NA     NA     NA     NA
+## 118 119     NA     NA     NA    NA     NA     NA     NA
+## 119 120     NA     NA     NA    NA     NA     NA     NA
+## 120 121     NA     NA     NA    NA     NA     NA     NA
+## 121 122     NA     NA     NA    NA     NA     NA     NA
+## 122 123     NA     NA     NA    NA     NA     NA     NA
+## 123 124     NA     NA     NA    NA     NA     NA     NA
+## 124 125     NA     NA     NA    NA     NA     NA     NA
+## 125 126     NA     NA     NA    NA     NA     NA     NA
+## 126 127     NA     NA     NA    NA     NA     NA     NA
+## 127 128     NA     NA     NA    NA     NA     NA     NA
+## 128 129     NA     NA     NA    NA     NA     NA     NA
+## 129 130     NA     NA     NA    NA     NA     NA     NA
+## 130 131     NA     NA     NA    NA     NA     NA     NA
+## 131 132     NA     NA     NA    NA     NA     NA     NA
+## 132 133     NA     NA     NA    NA     NA     NA     NA
+## 133 134     NA     NA     NA    NA     NA     NA     NA
+## 134 135     NA     NA     NA    NA     NA     NA     NA
+## 135 136     NA     NA     NA    NA     NA     NA     NA
+## 136 137     NA     NA     NA    NA     NA     NA     NA
+## 137 138     NA     NA     NA    NA     NA     NA     NA
+## 138 139     NA     NA     NA    NA     NA     NA     NA
+##       z.8    z.9   z.10 s  p1  p2
+## 1      NA     NA     NA M  NA  NA
+## 2      NA     NA     NA F  NA  NA
+## 3      NA     NA     NA M  NA  NA
+## 4      NA     NA     NA F  NA  NA
+## 5      NA     NA     NA F  NA  NA
+## 6      NA     NA     NA M  NA  NA
+## 7      NA     NA     NA M  NA  NA
+## 8      NA     NA     NA F  NA  NA
+## 9      NA     NA     NA F  NA  NA
+## 10     NA     NA     NA F   5   6
+## 11     NA     NA     NA F   5   6
+## 12     NA     NA     NA M   5   6
+## 13     NA     NA     NA M   5   6
+## 14     NA     NA     NA F   9   3
+## 15     NA     NA     NA F   9   3
+## 16     NA     NA     NA F   9   3
+## 17     NA     NA     NA M   9   3
+## 18     NA     NA     NA M  10   7
+## 19     NA     NA     NA F  10   7
+## 20     NA     NA     NA F  10   7
+## 21     NA     NA     NA M  10   7
+## 22     NA     NA     NA M   2   3
+## 23     NA     NA     NA F   2   3
+## 24     NA     NA     NA M   4  18
+## 25     NA     NA     NA M   4  18
+## 26     NA     NA     NA F   4  18
+## 27     NA     NA     NA F   4  18
+## 28     NA     NA     NA M   5  13
+## 29     NA     NA     NA M   9   7
+## 30     NA     NA     NA M   9   7
+## 31     NA     NA     NA F  12   3
+## 32     NA     NA     NA M  12   3
+## 33     NA     NA     NA M  12   3
+## 34     NA     NA     NA F  15  13
+## 35     NA     NA     NA F  15  31
+## 36     NA     NA     NA M  15  31
+## 37     NA     NA     NA M  15  31
+## 38     NA     NA     NA M  15  31
+## 39     NA     NA     NA F  28  26
+## 40     NA     NA     NA F  28  26
+## 41     NA     NA     NA M  28  26
+## 42     NA     NA     NA F  35  29
+## 43     NA     NA     NA F  28  42
+## 44     NA     NA     NA M  28  42
+## 45     NA     NA     NA F  28  42
+## 46     NA     NA     NA F  28  42
+## 47     NA     NA     NA F  28  42
+## 48     NA     NA     NA F  28  42
+## 49     NA     NA     NA M  32  33
+## 50     NA     NA     NA M  40  37
+## 51     NA     NA     NA M  40  37
+## 52     NA     NA     NA F  41  39
+## 53     NA     NA     NA M  41  39
+## 54     NA     NA     NA M  43  33
+## 55     NA     NA     NA M  28  52
+## 56     NA     NA     NA M  28  52
+## 57     NA     NA     NA F  32  39
+## 58     NA     NA     NA M  32  39
+## 59     NA     NA     NA F  32  39
+## 60     NA     NA     NA F  36  52
+## 61     NA     NA     NA F  36  52
+## 62     NA     NA     NA M  40  39
+## 63     NA     NA     NA M  40  39
+## 64  16.84     NA     NA M  41  52
+## 65     NA     NA     NA M  41  52
+## 66     NA     NA     NA M  43  39
+## 67     NA     NA     NA F  43  39
+## 68     NA     NA     NA F  43  39
+## 69     NA     NA     NA F  44  52
+## 70     NA     NA     NA F  48  52
+## 71     NA     NA     NA M  48  52
+## 72     NA     NA     NA F  49  39
+## 73     NA     NA     NA M  49  39
+## 74     NA     NA     NA M  32  74
+## 75     NA     NA     NA F  32  74
+## 76     NA     NA     NA M  32  74
+## 77     NA     NA     NA M  32  74
+## 78     NA     NA     NA M  44  74
+## 79     NA     NA     NA M  44  74
+## 80     NA     NA     NA F  44  74
+## 81     NA     NA     NA F  49  52
+## 82     NA     NA     NA M  49  52
+## 83     NA     NA     NA M  49  52
+## 84     NA     NA     NA M  49  52
+## 85     NA     NA     NA M  49  52
+## 86     NA     NA     NA F  60  57
+## 87     NA     NA     NA M  60  57
+## 88     NA     NA     NA F  61  64
+## 89  12.65     NA     NA M  61  64
+## 90     NA     NA     NA M  68  63
+## 91  11.65 12.129     NA F  68  63
+## 92  11.84 12.496     NA F  69  63
+## 93     NA     NA     NA F  69  63
+## 94     NA     NA     NA F  69  63
+## 95     NA     NA     NA M  68  91
+## 96  10.71     NA     NA M  69  85
+## 97  12.18 14.371     NA M  89  91
+## 98  10.90     NA     NA M  89  91
+## 99  10.68     NA     NA F  94  85
+## 100 10.78 12.254 13.479 F  95  72
+## 101    NA     NA     NA M  95  72
+## 102 10.88 12.157     NA F  95  72
+## 103 10.28 11.784     NA F  93  90
+## 104 10.30 11.748 13.382 F 100  65
+## 105 10.52 10.621 10.806 M 101  90
+## 106 10.49 12.474 13.290 F 103  97
+## 107 10.42 11.147 13.332 M 103  97
+## 108 10.39 12.057 13.872 M 103  97
+## 109    NA  9.730 11.187 M  92 108
+## 110    NA 10.128 10.559 M  92 108
+## 111    NA 10.297     NA M  92 108
+## 112    NA 10.302 10.812 F  93 106
+## 113    NA 10.259 11.375 M  93 106
+## 114    NA 10.498     NA F  93 106
+## 115    NA 10.605 12.680 M 101 106
+## 116    NA 10.200     NA M 103  98
+## 117    NA 10.407 10.765 M 104  98
+## 118    NA 10.304 11.107 F 104  98
+## 119    NA 10.123 11.955 M 104  98
+## 120    NA  9.885     NA F 105  98
+## 121    NA 10.020 11.369 M 107  98
+## 122    NA 10.691 10.890 F 107  98
+## 123    NA 10.570     NA F 107  98
+## 124    NA 10.466 11.617 M 107  98
+## 125    NA     NA  9.990 M 101 109
+## 126    NA     NA 10.484 F 105 110
+## 127    NA     NA  9.849 M 105 110
+## 128    NA     NA  9.861 M 105 110
+## 129    NA     NA 10.474 M 107 116
+## 130    NA     NA 10.607 F 107 116
+## 131    NA     NA 10.673 F 107 116
+## 132    NA     NA 10.492 F 107 116
+## 133    NA     NA 10.678 F 107 116
+## 134    NA     NA 10.445 F 113 106
+## 135    NA     NA 10.641 M 113 106
+## 136    NA     NA 10.431 F 113 106
+## 137    NA     NA 10.456 F 119 118
+## 138    NA     NA 10.645 F 123 108
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+
+\end{document}

@@ -26,7 +26,7 @@
 #  - A large number of loci (>20) will give easily patterns expected from quantitative genetics. We can draw randomly the number of loci per trait. 
 #  - My main concern at the moment is the initialisation of the genetic diversity: it will be hard to avoid a fast decline of diversity at the beginning. One possibility is using neutral expectations of diversity (n-coalescent or Ewens distribution)
 #  - We probably do not need mutations if we consider a population over no more than some tens of generations.
-#  - Sex (M/F). Could be genetically determined by on locus, thus allowing random fluctuations of sex ratio and thus population structure.
+#  V Sex (M/F). Could be genetically determined by on locus, thus allowing random fluctuations of sex ratio and thus population structure.
 
 # Dynamic [these numbers do change after initialisation]
 #  V alive (boolean, true/false) [boolean]
