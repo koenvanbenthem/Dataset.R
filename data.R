@@ -247,7 +247,7 @@ setMethod("Surv","Leprechaun",function(Object){
 	
 	if(runif(1)>sizeSurvival(Object@age,Object@size,Object@camemberts)){
 		Object@alive<-FALSE
-		ALIVE<<-ALIVE[ALIVE!=Object@ID]
+		DEAD<<-c(DEAD,Object@ID)
 	}
 	
 	return(Object)
@@ -316,20 +316,28 @@ pop<-c(new("Leprechaun"))
 for(i in 2:10){
 	pop<-c(pop,new("Leprechaun"))
 }
+############### Function for printing values
+print_info<-function(YR,ALIVE,CID,camembert){
+	cat("\nAt the beginning of year:",YR,"\nThere are:",length(ALIVE),"Leprechauns\n-----------------\n")
+	cat("ALIVE:",ALIVE,"\n")
+	cat("Current ID:",CID,"\n")
+  	cat("\n-----------------\nThe camembert production is:",camembert,"\n")
+	return()
+}
 
 ############### List of living individuals [their indices], this will save time later, because dead individuals are not looped over
 ALIVE<-1:length(pop)
 
 filename<-"pop.csv"
+
 cat("t\tID\tz\tbvs\tC\ts\tARS\tage\tp1\tp2\tphi",file=filename,append=FALSE)
 
 ############### The start of time
-for(YR in 1:30){
+for(YR in 1:18){
   camembert<-abs(round(rnorm(n=1,mean=MeanCamembert,sd=SDCamembert),digits=0)) # ressources for year YR
-	cat("\nAt the beginning of year:",YR,"\nThere are:",length(ALIVE),"Leprechauns\n-----------------\n")
-	cat("ALIVE:",ALIVE,"\n")
-	cat("Current ID:",CID,"\n")
-  cat("\n-----------------\nThe camembert production is:",camembert,"\n")
+  
+  print_info(YR,ALIVE,CID,camembert)
+
 	#### Competition for ressources
   SizesAlive<-as.numeric(lapply(pop,Size))[ALIVE]
   #HunterQualities<-rep(x=1/length(ALIVE),length(ALIVE))# here completely random. prob can introduce quality for competition
@@ -339,17 +347,14 @@ for(YR in 1:30){
     pop[[as.integer(names(podium))[i]]]<-Food(pop[[as.integer(names(podium))[i]]])
   }
   
-  #### Survival
-  FATUM<-ALIVE
-	for(i in ALIVE){
-		pop[[i]]<-Surv(pop[[i]])
-	}
-	DEAD<-setdiff(FATUM,ALIVE)
+  	#### Survival
+  	DEAD<-c()
+	pop[ALIVE]<-lapply(pop[ALIVE],Surv)
+	ALIVE<-ALIVE[!(ALIVE %in% DEAD)]
+	
 	#### Age+1 and growth
-	for(i in ALIVE){
-		pop[[i]]<-Age(pop[[i]])
-		pop[[i]]<-Grow(pop[[i]])	
-	}
+	pop[ALIVE]<-lapply(pop[ALIVE],Age)
+	pop[ALIVE]<-lapply(pop[ALIVE],Grow)
 	
 	#### Reproduction  ### Not the easiest part (but necessary if we want to allow the population to grow)
 	
@@ -369,8 +374,8 @@ for(YR in 1:30){
 	
 	# We take a female based approach: we determine for each females 
 	from<-CID
+	pop[females]<-lapply(pop[females],Num_off)
 	for(i in females){
-		pop[[i]]<-Num_off(pop[[i]])
     Noffs<-pop[[i]]@ARS
 		if(Noffs>0 & length(males>0)){
 			#Determine the father
