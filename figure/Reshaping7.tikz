@@ -1,0 +1,105 @@
+% Created by tikzDevice version 0.7.0 on 2014-05-14 15:07:18
+% !TEX encoding = UTF-8 Unicode
+\documentclass{article}
+\nonstopmode
+
+\usepackage{tikz}
+
+\usepackage[active,tightpage,psfixbb]{preview}
+
+\PreviewEnvironment{pgfpicture}
+
+\setlength\PreviewBorder{0pt}
+
+\newcommand{\SweaveOpts}[1]{}  % do not interfere with LaTeX
+\newcommand{\SweaveInput}[1]{} % because they are not real TeX commands
+\newcommand{\Sexpr}[1]{}       % will only be parsed by R
+
+
+\setlength\parindent{0pt}
+
+
+\begin{document}
+
+\begin{tikzpicture}[x=1pt,y=1pt]
+\definecolor[named]{fillColor}{rgb}{1.00,1.00,1.00}
+\path[use as bounding box,fill=fillColor,fill opacity=0.00] (0,0) rectangle (505.89,505.89);
+\begin{scope}
+\path[clip] ( 54.00, 54.00) rectangle (487.89,487.89);
+\definecolor[named]{drawColor}{rgb}{0.00,0.00,0.00}
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (384.10,471.82) circle (  1.69);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (144.11,255.35) circle (  1.69);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (111.98,289.82) circle (  1.69);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] ( 96.67,252.61) circle (  1.69);
+\end{scope}
+\begin{scope}
+\path[clip] (  0.00,  0.00) rectangle (505.89,505.89);
+\definecolor[named]{drawColor}{rgb}{0.00,0.00,0.00}
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (140.15, 54.00) -- (468.48, 54.00);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (140.15, 54.00) -- (140.15, 49.50);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (249.59, 54.00) -- (249.59, 49.50);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (359.04, 54.00) -- (359.04, 49.50);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (468.48, 54.00) -- (468.48, 49.50);
+
+\node[text=drawColor,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at (140.15, 37.80) {11};
+
+\node[text=drawColor,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at (249.59, 37.80) {12};
+
+\node[text=drawColor,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at (359.04, 37.80) {13};
+
+\node[text=drawColor,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at (468.48, 37.80) {14};
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] ( 54.00, 75.03) -- ( 54.00,487.38);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] ( 54.00, 75.03) -- ( 49.50, 75.03);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] ( 54.00,157.50) -- ( 49.50,157.50);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] ( 54.00,239.97) -- ( 49.50,239.97);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] ( 54.00,322.44) -- ( 49.50,322.44);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] ( 54.00,404.91) -- ( 49.50,404.91);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] ( 54.00,487.38) -- ( 49.50,487.38);
+
+\node[text=drawColor,rotate= 90.00,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at ( 43.20, 75.03) {9};
+
+\node[text=drawColor,rotate= 90.00,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at ( 43.20,157.50) {10};
+
+\node[text=drawColor,rotate= 90.00,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at ( 43.20,239.97) {11};
+
+\node[text=drawColor,rotate= 90.00,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at ( 43.20,322.44) {12};
+
+\node[text=drawColor,rotate= 90.00,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at ( 43.20,404.91) {13};
+
+\node[text=drawColor,rotate= 90.00,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at ( 43.20,487.38) {14};
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] ( 54.00, 54.00) --
+	(487.89, 54.00) --
+	(487.89,487.89) --
+	( 54.00,487.89) --
+	( 54.00, 54.00);
+\end{scope}
+\begin{scope}
+\path[clip] (  0.00,  0.00) rectangle (505.89,505.89);
+\definecolor[named]{drawColor}{rgb}{0.00,0.00,0.00}
+
+\node[text=drawColor,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.92] at (270.95,490.26) {\bfseries Year 7};
+
+\node[text=drawColor,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at (270.95, 19.80) {z(7)};
+
+\node[text=drawColor,rotate= 90.00,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at ( 25.20,270.95) {z(8)};
+\end{scope}
+\end{tikzpicture}
+
+\end{document}
