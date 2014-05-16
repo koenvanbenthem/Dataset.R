@@ -1,0 +1,125 @@
+% Created by tikzDevice version 0.7.0 on 2014-05-14 15:07:27
+% !TEX encoding = UTF-8 Unicode
+\documentclass{article}
+\nonstopmode
+
+\usepackage{tikz}
+
+\usepackage[active,tightpage,psfixbb]{preview}
+
+\PreviewEnvironment{pgfpicture}
+
+\setlength\PreviewBorder{0pt}
+
+\newcommand{\SweaveOpts}[1]{}  % do not interfere with LaTeX
+\newcommand{\SweaveInput}[1]{} % because they are not real TeX commands
+\newcommand{\Sexpr}[1]{}       % will only be parsed by R
+
+
+\setlength\parindent{0pt}
+
+
+\begin{document}
+
+\begin{tikzpicture}[x=1pt,y=1pt]
+\definecolor[named]{fillColor}{rgb}{1.00,1.00,1.00}
+\path[use as bounding box,fill=fillColor,fill opacity=0.00] (0,0) rectangle (505.89,505.89);
+\begin{scope}
+\path[clip] ( 54.00, 54.00) rectangle (487.89,487.89);
+\definecolor[named]{drawColor}{rgb}{0.00,0.00,0.00}
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (405.51,471.82) circle (  1.69);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (350.82,392.92) circle (  1.69);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (303.01,334.32) circle (  1.69);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (354.79,384.31) circle (  1.69);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (299.78,349.15) circle (  1.69);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (329.81,339.57) circle (  1.69);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (364.08,421.75) circle (  1.69);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (263.58,324.30) circle (  1.69);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (232.38,249.93) circle (  1.69);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (316.24,340.66) circle (  1.69);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (292.64,340.15) circle (  1.69);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (164.39,208.17) circle (  1.69);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (242.63,270.40) circle (  1.69);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (338.41,383.12) circle (  1.69);
+\end{scope}
+\begin{scope}
+\path[clip] (  0.00,  0.00) rectangle (505.89,505.89);
+\definecolor[named]{drawColor}{rgb}{0.00,0.00,0.00}
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] ( 64.77, 54.00) -- (454.62, 54.00);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] ( 64.77, 54.00) -- ( 64.77, 49.50);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (129.75, 54.00) -- (129.75, 49.50);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (194.72, 54.00) -- (194.72, 49.50);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (259.70, 54.00) -- (259.70, 49.50);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (324.67, 54.00) -- (324.67, 49.50);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (389.65, 54.00) -- (389.65, 49.50);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] (454.62, 54.00) -- (454.62, 49.50);
+
+\node[text=drawColor,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at ( 64.77, 37.80) {9};
+
+\node[text=drawColor,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at (129.75, 37.80) {10};
+
+\node[text=drawColor,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at (194.72, 37.80) {11};
+
+\node[text=drawColor,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at (259.70, 37.80) {12};
+
+\node[text=drawColor,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at (324.67, 37.80) {13};
+
+\node[text=drawColor,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at (389.65, 37.80) {14};
+
+\node[text=drawColor,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at (454.62, 37.80) {15};
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] ( 54.00,160.79) -- ( 54.00,381.30);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] ( 54.00,160.79) -- ( 49.50,160.79);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] ( 54.00,271.05) -- ( 49.50,271.05);
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] ( 54.00,381.30) -- ( 49.50,381.30);
+
+\node[text=drawColor,rotate= 90.00,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at ( 43.20,160.79) {10};
+
+\node[text=drawColor,rotate= 90.00,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at ( 43.20,271.05) {12};
+
+\node[text=drawColor,rotate= 90.00,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at ( 43.20,381.30) {14};
+
+\path[draw=drawColor,line width= 0.4pt,line join=round,line cap=round] ( 54.00, 54.00) --
+	(487.89, 54.00) --
+	(487.89,487.89) --
+	( 54.00,487.89) --
+	( 54.00, 54.00);
+\end{scope}
+\begin{scope}
+\path[clip] (  0.00,  0.00) rectangle (505.89,505.89);
+\definecolor[named]{drawColor}{rgb}{0.00,0.00,0.00}
+
+\node[text=drawColor,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.92] at (270.95,490.26) {\bfseries Year 13};
+
+\node[text=drawColor,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at (270.95, 19.80) {z(13)};
+
+\node[text=drawColor,rotate= 90.00,anchor=base,inner sep=0pt, outer sep=0pt, scale=  1.60] at ( 25.20,270.95) {z(14)};
+\end{scope}
+\end{tikzpicture}
+
+\end{document}

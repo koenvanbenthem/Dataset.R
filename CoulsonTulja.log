@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2014.1.20)  13 MAY 2014 14:20
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2014.1.20)  14 MAY 2014 15:07
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -81,18 +81,18 @@ tim
 (./CoulsonTulja.aux)
 \openout1 = `CoulsonTulja.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 53.
-LaTeX Font Info:    ... okay on input line 53.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 53.
-LaTeX Font Info:    ... okay on input line 53.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 53.
-LaTeX Font Info:    ... okay on input line 53.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 53.
-LaTeX Font Info:    ... okay on input line 53.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 53.
-LaTeX Font Info:    ... okay on input line 53.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 53.
-LaTeX Font Info:    ... okay on input line 53.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
 
 (/usr/local/texlive/2013/texmf-dist/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
@@ -155,76 +155,193 @@ G,.JBIG2,.JB2,.eps]
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-Package color Info: Redefining color shadecolor on input line 58.
+Package color Info: Redefining color shadecolor on input line 59.
 LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10> not available
-(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 60.
-Package color Info: Redefining color shadecolor on input line 81.
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 61.
+Package color Info: Redefining color shadecolor on input line 83.
 
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 89--89
+Overfull \hbox (11.99689pt too wide) in paragraph at lines 93--93
 [][]\OT1/cmtt/m/n/10 dat3[][]<-[][]reshape[][](dat2,[] []idvar[] []=[] []"ID"[]
 [],[] []timevar[] []=[] []"t"[][],[] []direction[] []=[] []"wide"[][])[][] 
+ []
+
+LaTeX Font Info:    Try loading font information for OMS+cmtt on input line 94.
+
+(/Library/Frameworks/R.framework/Resources/share/texmf/tex/latex/omscmtt.fd
+File: omscmtt.fd 
+)
+LaTeX Font Info:    Font shape `OMS/cmtt/m/n' in size <10> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 94.
+
+Overfull \hbox (242.99487pt too wide) in paragraph at lines 95--95
+[]  []\OT1/cmtt/m/n/10 plot[][](dat3[,i],dat3[,i[][]+[][]1[][]],[][]main[][]=[]
+[]paste[][]([][]"Year"[][],i[][]-[][]1[][]),[][]xlab[][]=[][]paste[][]([][]"z("
+[][],i[][]-[][]1[][],[][]")"[][],[][]sep[][]=[][]""[][]),[][]ylab[][]=[][]paste
+[][]([][]"z("[][],i,[][]")"[][],[][]sep[][]=[][]""[][]))[][] 
+ []
+
+<figure/Reshaping1.pdf, id=1, 505.89pt x 505.89pt>
+File: figure/Reshaping1.pdf Graphic file (type pdf)
+ <use figure/Reshaping1.pdf>
+Package pdftex.def Info: figure/Reshaping1.pdf used on input line 117.
+(pdftex.def)             Requested size: 120.7521pt x 120.75221pt.
+
+<figure/Reshaping2.pdf, id=2, 505.89pt x 505.89pt>
+File: figure/Reshaping2.pdf Graphic file (type pdf)
+ <use figure/Reshaping2.pdf>
+Package pdftex.def Info: figure/Reshaping2.pdf used on input line 118.
+(pdftex.def)             Requested size: 120.7521pt x 120.75221pt.
+
+<figure/Reshaping3.pdf, id=3, 505.89pt x 505.89pt>
+File: figure/Reshaping3.pdf Graphic file (type pdf)
+ <use figure/Reshaping3.pdf>
+Package pdftex.def Info: figure/Reshaping3.pdf used on input line 119.
+(pdftex.def)             Requested size: 120.7521pt x 120.75221pt.
+
+<figure/Reshaping4.pdf, id=4, 505.89pt x 505.89pt>
+File: figure/Reshaping4.pdf Graphic file (type pdf)
+ <use figure/Reshaping4.pdf>
+Package pdftex.def Info: figure/Reshaping4.pdf used on input line 120.
+(pdftex.def)             Requested size: 120.7521pt x 120.75221pt.
+
+<figure/Reshaping5.pdf, id=5, 505.89pt x 505.89pt>
+File: figure/Reshaping5.pdf Graphic file (type pdf)
+ <use figure/Reshaping5.pdf>
+Package pdftex.def Info: figure/Reshaping5.pdf used on input line 121.
+(pdftex.def)             Requested size: 120.7521pt x 120.75221pt.
+
+<figure/Reshaping6.pdf, id=6, 505.89pt x 505.89pt>
+File: figure/Reshaping6.pdf Graphic file (type pdf)
+ <use figure/Reshaping6.pdf>
+Package pdftex.def Info: figure/Reshaping6.pdf used on input line 122.
+(pdftex.def)             Requested size: 120.7521pt x 120.75221pt.
+
+<figure/Reshaping7.pdf, id=7, 505.89pt x 505.89pt>
+File: figure/Reshaping7.pdf Graphic file (type pdf)
+ <use figure/Reshaping7.pdf>
+Package pdftex.def Info: figure/Reshaping7.pdf used on input line 123.
+(pdftex.def)             Requested size: 120.7521pt x 120.75221pt.
+
+<figure/Reshaping8.pdf, id=8, 505.89pt x 505.89pt>
+File: figure/Reshaping8.pdf Graphic file (type pdf)
+ <use figure/Reshaping8.pdf>
+Package pdftex.def Info: figure/Reshaping8.pdf used on input line 124.
+(pdftex.def)             Requested size: 120.7521pt x 120.75221pt.
+
+<figure/Reshaping9.pdf, id=9, 505.89pt x 505.89pt>
+File: figure/Reshaping9.pdf Graphic file (type pdf)
+ <use figure/Reshaping9.pdf>
+Package pdftex.def Info: figure/Reshaping9.pdf used on input line 125.
+(pdftex.def)             Requested size: 120.7521pt x 120.75221pt.
+
+<figure/Reshaping10.pdf, id=10, 505.89pt x 505.89pt>
+File: figure/Reshaping10.pdf Graphic file (type pdf)
+
+<use figure/Reshaping10.pdf>
+Package pdftex.def Info: figure/Reshaping10.pdf used on input line 126.
+(pdftex.def)             Requested size: 120.7521pt x 120.75221pt.
+
+<figure/Reshaping11.pdf, id=11, 505.89pt x 505.89pt>
+File: figure/Reshaping11.pdf Graphic file (type pdf)
+
+<use figure/Reshaping11.pdf>
+Package pdftex.def Info: figure/Reshaping11.pdf used on input line 127.
+(pdftex.def)             Requested size: 120.7521pt x 120.75221pt.
+
+<figure/Reshaping12.pdf, id=12, 505.89pt x 505.89pt>
+File: figure/Reshaping12.pdf Graphic file (type pdf)
+
+<use figure/Reshaping12.pdf>
+Package pdftex.def Info: figure/Reshaping12.pdf used on input line 128.
+(pdftex.def)             Requested size: 120.7521pt x 120.75221pt.
+
+<figure/Reshaping13.pdf, id=13, 505.89pt x 505.89pt>
+File: figure/Reshaping13.pdf Graphic file (type pdf)
+
+<use figure/Reshaping13.pdf>
+Package pdftex.def Info: figure/Reshaping13.pdf used on input line 129.
+(pdftex.def)             Requested size: 120.7521pt x 120.75221pt.
+
+<figure/Reshaping14.pdf, id=14, 505.89pt x 505.89pt>
+File: figure/Reshaping14.pdf Graphic file (type pdf)
+
+<use figure/Reshaping14.pdf>
+Package pdftex.def Info: figure/Reshaping14.pdf used on input line 130.
+(pdftex.def)             Requested size: 120.7521pt x 120.75221pt.
+
+<figure/Reshaping15.pdf, id=15, 505.89pt x 505.89pt>
+File: figure/Reshaping15.pdf Graphic file (type pdf)
+
+<use figure/Reshaping15.pdf>
+Package pdftex.def Info: figure/Reshaping15.pdf used on input line 131.
+(pdftex.def)             Requested size: 120.7521pt x 120.75221pt.
+
+<figure/Reshaping16.pdf, id=16, 505.89pt x 505.89pt>
+File: figure/Reshaping16.pdf Graphic file (type pdf)
+
+<use figure/Reshaping16.pdf>
+Package pdftex.def Info: figure/Reshaping16.pdf used on input line 132.
+(pdftex.def)             Requested size: 120.7521pt x 120.75221pt.
+
+<figure/Reshaping17.pdf, id=17, 505.89pt x 505.89pt>
+File: figure/Reshaping17.pdf Graphic file (type pdf)
+
+<use figure/Reshaping17.pdf>
+Package pdftex.def Info: figure/Reshaping17.pdf used on input line 133.
+(pdftex.def)             Requested size: 120.7521pt x 120.75221pt.
+
+Overfull \hbox (21.70074pt too wide) in paragraph at lines 117--134
+[][] [] []
+ []
+
+
+Overfull \hbox (21.70074pt too wide) in paragraph at lines 117--134
+[] [] []
+ []
+
+
+Overfull \hbox (21.70074pt too wide) in paragraph at lines 117--134
+[] [] []
+ []
+
+
+Overfull \hbox (21.70074pt too wide) in paragraph at lines 117--134
+[] [] []
+ []
+
+
+Overfull \hbox (21.70074pt too wide) in paragraph at lines 117--134
+[] [] []
  []
 
 [1
 
 {/Users/koen/Library/texlive/2013/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
-]
-Underfull \vbox (badness 10000) detected at line 375
- []
-
-
-Underfull \vbox (badness 10000) detected at line 375
- []
-
-[2]
-Underfull \vbox (badness 10000) detected at line 375
- []
-
-
-Underfull \vbox (badness 10000) detected at line 375
- []
-
-[3]
-Underfull \vbox (badness 10000) detected at line 375
- []
-
-
-Underfull \vbox (badness 10000) detected at line 375
- []
-
-[4]
-Underfull \vbox (badness 10000) detected at line 375
- []
-
-
-Underfull \vbox (badness 10000) detected at line 375
- []
-
-[5]
-Underfull \vbox (badness 10000) detected at line 375
- []
-
-
-Underfull \vbox (badness 10000) detected at line 375
- []
-
-[6] [7] (./CoulsonTulja.aux) ) 
+] [2 <./figure/Reshaping1.pdf> <./figure/Reshaping2.pdf> <./figure/Reshaping3.p
+df> <./figure/Reshaping4.pdf> <./figure/Reshaping5.pdf> <./figure/Reshaping6.pd
+f> <./figure/Reshaping7.pdf> <./figure/Reshaping8.pdf> <./figure/Reshaping9.pdf
+> <./figure/Reshaping10.pdf> <./figure/Reshaping11.pdf> <./figure/Reshaping12.p
+df>] [3 <./figure/Reshaping13.pdf> <./figure/Reshaping14.pdf> <./figure/Reshapi
+ng15.pdf> <./figure/Reshaping16.pdf> <./figure/Reshaping17.pdf>]
+(./CoulsonTulja.aux) ) 
 Here is how much of TeX's memory you used:
- 1601 strings out of 493315
- 23318 string characters out of 6137904
- 168441 words of memory out of 5000000
- 5057 multiletter control sequences out of 15000+600000
+ 1707 strings out of 493315
+ 25787 string characters out of 6137904
+ 86275 words of memory out of 5000000
+ 5140 multiletter control sequences out of 15000+600000
  3976 words of font info for 16 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
- 38i,5n,25p,290b,246s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/local/texlive/2013/texmf-dist/fonts/type1/p
-ublic/amsfonts/cm/cmitt10.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/p
-ublic/amsfonts/cm/cmr10.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/pub
-lic/amsfonts/cm/cmtt10.pfb>
-Output written on CoulsonTulja.pdf (7 pages, 40384 bytes).
+ 38i,5n,23p,476b,282s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/local/texlive/2013/texmf-dist/fonts/type1/public/am
+sfonts/cm/cmbx10.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/public/ams
+fonts/cm/cmitt10.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/public/ams
+fonts/cm/cmr10.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfo
+nts/cm/cmsy10.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfon
+ts/cm/cmtt10.pfb>
+Output written on CoulsonTulja.pdf (3 pages, 101611 bytes).
 PDF statistics:
- 40 PDF objects out of 1000 (max. 8388607)
- 27 compressed objects within 1 object stream
+ 171 PDF objects out of 1000 (max. 8388607)
+ 142 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
- 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 86 words of extra memory for PDF output out of 10000 (max. 10000000)
 
