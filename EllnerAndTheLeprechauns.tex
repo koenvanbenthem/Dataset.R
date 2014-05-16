@@ -1,0 +1,274 @@
+\documentclass{article}\usepackage{knitr}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+
+\begin{document}
+\title{Applying Ellner approach to leprechaun population dynamic}
+\date{\today}
+\author{Timothee Bonnet}
+\maketitle
+
+\section{A glance at the magical world}
+
+
+Leprechaun are magical creatures feeding on camembert. In the population of interest competition for camembert is pretty tough and some individual can monopolize most of the ressource on a given year. Camembert ownership affects reproduction and survival probability (it can only decrease it).
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+
+
+{\ttfamily\noindent\color{warningcolor}{\#\# Warning: cannot open file 'pop1.csv': No such file or directory}}
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: cannot open the connection}}\end{kframe}
+\end{knitrout}
+
+
+Population size changes like that:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'popfile' not found}}
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'popsize' not found}}\end{kframe}
+\end{knitrout}
+
+Note the demographic bottleneck on generation 13.
+
+This is the distribution of sizes accross years:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'popfile' not found}}\end{kframe}
+\end{knitrout}
+
+
+
+And this is the distribution of breeding values for size at birth accross years.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'popfile' not found}}\end{kframe}
+\end{knitrout}
+
+Note the general decrease in genetic variance due to directional selection on size, but the increase in genetic variance after the population bottleneck. Some people think that it represent a jaguar or a map of Asia, but it is still unclear what we can deduce from this.
+
+\section{A decomposition attempt}
+We will try to decompose the dynamic of juvenile production into its ecological and evolutionary components. (\textit{first I wanted to decompose the population size, until I realized that this is not possible with Ellner approach, because it requires some replication to estimate the partial derivatives of the trait of interest by its components. So I used juvenile production in order to get replication at the level of individual.})
+We will consider only adult females in the decomposition of juvenile production.
+In a first section, we will decompose the trait of interest into the effect of size and the effect of camembert ownership.
+In a second section, in addition, we will split the effect of size into its genetic and plastic components.
+
+\textbf{At the moment what I am doing is probably wrong, and if it is not, you might not be able to understand what I am trying to do with the code unless you go back to Ellner's paper. I will try to improve this document soon.}
+\subsection{Phenotype and ressources}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'popfile' not found}}\end{kframe}
+\end{knitrout}
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{#plot(density(log(females$ARS)))#very grossly gaussian distribution}
+\hlcom{#### log(ARS) ~ C+z (Hairston)}
+
+\hlstd{evol}\hlkwb{<-}\hlkwd{vector}\hlstd{(}\hlkwc{length}\hlstd{=}\hlkwd{max}\hlstd{(females}\hlopt{$}\hlstd{t)}\hlopt{-}\hlnum{1}\hlstd{)}
+\end{alltt}
+
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'females' not found}}\begin{alltt}
+\hlstd{ecol}\hlkwb{<-}\hlkwd{vector}\hlstd{(}\hlkwc{length}\hlstd{=}\hlkwd{max}\hlstd{(females}\hlopt{$}\hlstd{t)}\hlopt{-}\hlnum{1}\hlstd{)}
+\end{alltt}
+
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'females' not found}}\begin{alltt}
+\hlkwa{for} \hlstd{(tempus} \hlkwa{in} \hlnum{2}\hlopt{:}\hlkwd{max}\hlstd{(females}\hlopt{$}\hlstd{t))}\hlcom{#for every time step}
+\hlstd{\{}
+  \hlstd{mARS0}\hlkwb{<-}\hlkwd{glm}\hlstd{(ARS}\hlopt{~}\hlnum{1}\hlopt{+}\hlstd{C}\hlopt{+}\hlstd{z,}
+             \hlkwc{data}\hlstd{=females[}\hlkwd{which}\hlstd{(females}\hlopt{$}\hlstd{t}\hlopt{==}\hlstd{(tempus}\hlopt{-}\hlnum{1}\hlstd{)} \hlopt{|} \hlstd{females}\hlopt{$}\hlstd{t}\hlopt{==}\hlstd{tempus),],}
+             \hlkwc{family}\hlstd{=poisson)}
+
+  \hlstd{intercept}\hlkwb{<-}\hlstd{mARS0}\hlopt{$}\hlstd{coefficients[}\hlnum{1}\hlstd{]}
+  \hlstd{dXdz}\hlkwb{<-}\hlstd{mARS0}\hlopt{$}\hlstd{coefficients[}\hlstr{"z"}\hlstd{]}
+  \hlstd{dXdk}\hlkwb{<-}\hlstd{mARS0}\hlopt{$}\hlstd{coefficients[}\hlstr{"C"}\hlstd{]}
+
+  \hlstd{Zt0}\hlkwb{<-}\hlkwd{mean}\hlstd{(females}\hlopt{$}\hlstd{z[}\hlkwd{which}\hlstd{(females}\hlopt{$}\hlstd{t}\hlopt{==}\hlstd{(tempus}\hlopt{-}\hlnum{1}\hlstd{))])}
+  \hlstd{kt0}\hlkwb{<-}\hlkwd{mean}\hlstd{(females}\hlopt{$}\hlstd{C[}\hlkwd{which}\hlstd{(females}\hlopt{$}\hlstd{t}\hlopt{==}\hlstd{(tempus}\hlopt{-}\hlnum{1}\hlstd{))])}
+  \hlstd{Zt1}\hlkwb{<-}\hlkwd{mean}\hlstd{(females}\hlopt{$}\hlstd{z[}\hlkwd{which}\hlstd{(females}\hlopt{$}\hlstd{t}\hlopt{==}\hlstd{tempus)])}
+  \hlstd{kt1}\hlkwb{<-}\hlkwd{mean}\hlstd{(females}\hlopt{$}\hlstd{C[}\hlkwd{which}\hlstd{(females}\hlopt{$}\hlstd{t}\hlopt{==}\hlstd{tempus)])}
+
+  \hlstd{Xtt}\hlkwb{<-}\hlkwd{mean}\hlstd{(females}\hlopt{$}\hlstd{ARS[}\hlkwd{which}\hlstd{(females}\hlopt{$}\hlstd{t}\hlopt{==}\hlstd{(tempus}\hlopt{-}\hlnum{1}\hlstd{))])} \hlcom{#not exactly exp(intercept+Zt0*dXdz+kt0*dXdk)}
+  \hlcom{#I do not want to account for the interaction (??) as it is problematic for XtT and XTt}
+  \hlstd{XTT}\hlkwb{<-}\hlkwd{mean}\hlstd{(females}\hlopt{$}\hlstd{ARS[}\hlkwd{which}\hlstd{(females}\hlopt{$}\hlstd{t}\hlopt{==}\hlstd{tempus)])}\hlcom{# not exactly exp(intercept+Zt1*dXdz+kt1*dXdk)}
+  \hlcom{#I do not want to account for the interaction (??) as it is problematic for XtT and XTt}
+  \hlstd{XtT}\hlkwb{<-}\hlkwd{exp}\hlstd{(intercept}\hlopt{+}\hlstd{Zt0}\hlopt{*}\hlstd{dXdz}\hlopt{+}\hlstd{kt1}\hlopt{*}\hlstd{dXdk)}\hlcom{#this is done with population mean assumption.}
+  \hlcom{#Would be impossible on an individual basis}
+  \hlstd{XTt}\hlkwb{<-}\hlkwd{exp}\hlstd{(intercept}\hlopt{+}\hlstd{Zt1}\hlopt{*}\hlstd{dXdz}\hlopt{+}\hlstd{kt0}\hlopt{*}\hlstd{dXdk)}\hlcom{#this is done with population mean assumption. }
+  \hlcom{#Would be impossible on an individual basis}
+
+  \hlstd{AX}\hlkwb{<-}\hlkwd{as.data.frame}\hlstd{(}\hlkwd{matrix}\hlstd{(}\hlkwc{data}\hlstd{=}\hlkwd{c}\hlstd{(Xtt,XTt,XtT,XTT,}\hlnum{0}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{),}\hlkwc{ncol}\hlstd{=}\hlnum{3}\hlstd{))}
+  \hlcom{#using an anova we get the respective importance of evolution and of ecology:}
+  \hlstd{m1X}\hlkwb{<-}\hlkwd{lm}\hlstd{(V1}\hlopt{~}\hlstd{V2}\hlopt{+}\hlstd{V3,}\hlkwc{data}\hlstd{=AX)}
+  \hlstd{evol[tempus}\hlopt{-}\hlnum{1}\hlstd{]}\hlkwb{<-}\hlstd{m1X}\hlopt{$}\hlstd{coefficients[}\hlstr{"V2"}\hlstd{]}
+  \hlstd{ecol[tempus}\hlopt{-}\hlnum{1}\hlstd{]}\hlkwb{<-}\hlstd{m1X}\hlopt{$}\hlstd{coefficients[}\hlstr{"V3"}\hlstd{]}
+  \hlcom{#or equivalently:}
+  \hlstd{evol[tempus}\hlopt{-}\hlnum{1}\hlstd{]}\hlkwb{<-}\hlnum{0.5}\hlopt{*}\hlstd{(XTT}\hlopt{-}\hlstd{XtT} \hlopt{+} \hlstd{XTt}\hlopt{-}\hlstd{Xtt)}
+  \hlstd{ecol[tempus}\hlopt{-}\hlnum{1}\hlstd{]}\hlkwb{<-}\hlnum{0.5}\hlopt{*}\hlstd{(XTT}\hlopt{-}\hlstd{XTt} \hlopt{+} \hlstd{XtT}\hlopt{-}\hlstd{Xtt)}
+  \hlcom{#(really it is exactly the same)}
+\hlstd{\}}
+\end{alltt}
+
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'females' not found}}\begin{alltt}
+  
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+An interesting thing is that we can detect the bottleneck episode on generation 13 quite clearly by looking at the components of trait change.(This is obvious as what happened is completely crazy and unrealistic. A single female got 284 pups while all the other females got 0 and died)
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'females' not found}}
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'evol' not found}}
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'ecol' not found}}
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'evol' not found}}
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: plot.new has not been called yet}}\end{kframe}
+\end{knitrout}
+
+
+The relative importance of evolution averaged over all years is:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{mean}\hlstd{(}\hlkwd{abs}\hlstd{(evol)}\hlopt{/}\hlstd{(}\hlkwd{abs}\hlstd{(evol)} \hlopt{+} \hlkwd{abs}\hlstd{(ecol)))}
+\end{alltt}
+
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'evol' not found}}\end{kframe}
+\end{knitrout}
+
+Yes, this is a beautiful number. I am very happy I managed to get it. Now, does somebody have any idea what this means?
+
+
+\subsection{Evolution, plasticity and ressources}
+We now consider phenotypic plasticity for size as a component distinct from evolution. We use breeding values to describe the evolutionary component, which is terribly unrealistic, as the breeding values are not observable.
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{evol} \hlkwb{<-} \hlkwd{vector}\hlstd{(}\hlkwc{length} \hlstd{=} \hlkwd{max}\hlstd{(females}\hlopt{$}\hlstd{t)} \hlopt{-} \hlnum{1}\hlstd{)}
+\end{alltt}
+
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'females' not found}}\begin{alltt}
+\hlstd{plas} \hlkwb{<-} \hlkwd{vector}\hlstd{(}\hlkwc{length} \hlstd{=} \hlkwd{max}\hlstd{(females}\hlopt{$}\hlstd{t)} \hlopt{-} \hlnum{1}\hlstd{)}
+\end{alltt}
+
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'females' not found}}\begin{alltt}
+\hlstd{ecol} \hlkwb{<-} \hlkwd{vector}\hlstd{(}\hlkwc{length} \hlstd{=} \hlkwd{max}\hlstd{(females}\hlopt{$}\hlstd{t)} \hlopt{-} \hlnum{1}\hlstd{)}
+\end{alltt}
+
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'females' not found}}\begin{alltt}
+\hlkwa{for} \hlstd{(tempus} \hlkwa{in} \hlnum{2}\hlopt{:}\hlkwd{max}\hlstd{(females}\hlopt{$}\hlstd{t)) \{}
+    \hlstd{mARS1} \hlkwb{<-} \hlkwd{glm}\hlstd{(ARS} \hlopt{~} \hlnum{1} \hlopt{+} \hlstd{C} \hlopt{+} \hlstd{z} \hlopt{+} \hlstd{bvs,} \hlkwc{data} \hlstd{= females[}\hlkwd{which}\hlstd{(females}\hlopt{$}\hlstd{t} \hlopt{==} \hlstd{(tempus} \hlopt{-}
+        \hlnum{1}\hlstd{)} \hlopt{|} \hlstd{females}\hlopt{$}\hlstd{t} \hlopt{==} \hlstd{tempus), ],} \hlkwc{family} \hlstd{= poisson)}
+    \hlstd{intercept} \hlkwb{<-} \hlstd{mARS0}\hlopt{$}\hlstd{coefficients[}\hlnum{1}\hlstd{]}
+    \hlstd{dXdz} \hlkwb{<-} \hlstd{mARS1}\hlopt{$}\hlstd{coefficients[}\hlstr{"z"}\hlstd{]}
+    \hlstd{dXdk} \hlkwb{<-} \hlstd{mARS1}\hlopt{$}\hlstd{coefficients[}\hlstr{"C"}\hlstd{]}
+    \hlstd{dXdg} \hlkwb{<-} \hlstd{mARS1}\hlopt{$}\hlstd{coefficients[}\hlstr{"bvs"}\hlstd{]}
+
+    \hlstd{Zt0} \hlkwb{<-} \hlkwd{mean}\hlstd{(females}\hlopt{$}\hlstd{z[}\hlkwd{which}\hlstd{(females}\hlopt{$}\hlstd{t} \hlopt{==} \hlstd{(tempus} \hlopt{-} \hlnum{1}\hlstd{))])}
+    \hlstd{kt0} \hlkwb{<-} \hlkwd{mean}\hlstd{(females}\hlopt{$}\hlstd{C[}\hlkwd{which}\hlstd{(females}\hlopt{$}\hlstd{t} \hlopt{==} \hlstd{(tempus} \hlopt{-} \hlnum{1}\hlstd{))])}
+    \hlstd{gt0} \hlkwb{<-} \hlkwd{mean}\hlstd{(females}\hlopt{$}\hlstd{bvs[}\hlkwd{which}\hlstd{(females}\hlopt{$}\hlstd{t} \hlopt{==} \hlstd{(tempus} \hlopt{-} \hlnum{1}\hlstd{))])}
+    \hlstd{Zt1} \hlkwb{<-} \hlkwd{mean}\hlstd{(females}\hlopt{$}\hlstd{z[}\hlkwd{which}\hlstd{(females}\hlopt{$}\hlstd{t} \hlopt{==} \hlstd{tempus)])}
+    \hlstd{kt1} \hlkwb{<-} \hlkwd{mean}\hlstd{(females}\hlopt{$}\hlstd{C[}\hlkwd{which}\hlstd{(females}\hlopt{$}\hlstd{t} \hlopt{==} \hlstd{tempus)])}
+    \hlstd{gt1} \hlkwb{<-} \hlkwd{mean}\hlstd{(females}\hlopt{$}\hlstd{bvs[}\hlkwd{which}\hlstd{(females}\hlopt{$}\hlstd{t} \hlopt{==} \hlstd{tempus)])}
+
+    \hlstd{Xttt} \hlkwb{<-} \hlkwd{mean}\hlstd{(females}\hlopt{$}\hlstd{ARS[}\hlkwd{which}\hlstd{(females}\hlopt{$}\hlstd{t} \hlopt{==} \hlstd{(tempus} \hlopt{-} \hlnum{1}\hlstd{))])}  \hlcom{# not exactly exp(intercept+Zt0*dXdz+kt0*dXdk) I do not want to account for the interaction (??) as it is problematic for XtT and XTt}
+    \hlstd{XTTT} \hlkwb{<-} \hlkwd{mean}\hlstd{(females}\hlopt{$}\hlstd{ARS[}\hlkwd{which}\hlstd{(females}\hlopt{$}\hlstd{t} \hlopt{==} \hlstd{tempus)])}  \hlcom{# not exactly exp(intercept+Zt1*dXdz+kt1*dXdk) I do not want to account for the interaction (??) as it is problematic for XtT and XTt}
+    \hlstd{XttT} \hlkwb{<-} \hlkwd{exp}\hlstd{(intercept} \hlopt{+} \hlstd{Zt0} \hlopt{*} \hlstd{dXdz} \hlopt{+} \hlstd{gt0} \hlopt{*} \hlstd{dXdg} \hlopt{+} \hlstd{kt1} \hlopt{*} \hlstd{dXdk)}  \hlcom{#this is done with population mean assumption. Would be impossible on an individual basis}
+    \hlstd{XtTt} \hlkwb{<-} \hlkwd{exp}\hlstd{(intercept} \hlopt{+} \hlstd{Zt0} \hlopt{*} \hlstd{dXdz} \hlopt{+} \hlstd{gt1} \hlopt{*} \hlstd{dXdg} \hlopt{+} \hlstd{kt0} \hlopt{*} \hlstd{dXdk)}  \hlcom{#this is done with population mean assumption. Would be impossible on an individual basis}
+    \hlstd{XtTT} \hlkwb{<-} \hlkwd{exp}\hlstd{(intercept} \hlopt{+} \hlstd{Zt0} \hlopt{*} \hlstd{dXdz} \hlopt{+} \hlstd{gt1} \hlopt{*} \hlstd{dXdg} \hlopt{+} \hlstd{kt1} \hlopt{*} \hlstd{dXdk)}  \hlcom{#this is done with population mean assumption. Would be impossible on an individual basis}
+    \hlstd{XTtt} \hlkwb{<-} \hlkwd{exp}\hlstd{(intercept} \hlopt{+} \hlstd{Zt1} \hlopt{*} \hlstd{dXdz} \hlopt{+} \hlstd{gt0} \hlopt{*} \hlstd{dXdg} \hlopt{+} \hlstd{kt0} \hlopt{*} \hlstd{dXdk)}  \hlcom{#this is done with population mean assumption. Would be impossible on an individual basis}
+    \hlstd{XTtT} \hlkwb{<-} \hlkwd{exp}\hlstd{(intercept} \hlopt{+} \hlstd{Zt1} \hlopt{*} \hlstd{dXdz} \hlopt{+} \hlstd{gt0} \hlopt{*} \hlstd{dXdg} \hlopt{+} \hlstd{kt1} \hlopt{*} \hlstd{dXdk)}  \hlcom{#this is done with population mean assumption. Would be impossible on an individual basis}
+    \hlstd{XTTt} \hlkwb{<-} \hlkwd{exp}\hlstd{(intercept} \hlopt{+} \hlstd{Zt1} \hlopt{*} \hlstd{dXdz} \hlopt{+} \hlstd{gt1} \hlopt{*} \hlstd{dXdg} \hlopt{+} \hlstd{kt0} \hlopt{*} \hlstd{dXdk)}  \hlcom{#this is done with population mean assumption. Would be impossible on an individual basis}
+
+    \hlstd{AX} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlkwd{c}\hlstd{(Xttt, XttT, XtTt, XtTT, XTtt, XTtT, XTTt, XTTT),} \hlkwd{c}\hlstd{(}\hlnum{0}\hlstd{,}
+        \hlnum{0}\hlstd{,} \hlnum{0}\hlstd{,} \hlnum{0}\hlstd{,} \hlnum{1}\hlstd{,} \hlnum{1}\hlstd{,} \hlnum{1}\hlstd{,} \hlnum{1}\hlstd{),} \hlkwd{c}\hlstd{(}\hlnum{0}\hlstd{,} \hlnum{0}\hlstd{,} \hlnum{1}\hlstd{,} \hlnum{1}\hlstd{,} \hlnum{0}\hlstd{,} \hlnum{0}\hlstd{,} \hlnum{1}\hlstd{,} \hlnum{1}\hlstd{),} \hlkwd{c}\hlstd{(}\hlnum{0}\hlstd{,} \hlnum{1}\hlstd{,} \hlnum{0}\hlstd{,} \hlnum{1}\hlstd{,} \hlnum{0}\hlstd{,} \hlnum{1}\hlstd{,}
+        \hlnum{0}\hlstd{,} \hlnum{1}\hlstd{))}
+    \hlkwd{names}\hlstd{(AX)} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"X"}\hlstd{,} \hlstr{"Z"}\hlstd{,} \hlstr{"G"}\hlstd{,} \hlstr{"K"}\hlstd{)}
+    \hlstd{m1X} \hlkwb{<-} \hlstd{(}\hlkwd{lm}\hlstd{(X} \hlopt{~} \hlstd{Z} \hlopt{+} \hlstd{G} \hlopt{+} \hlstd{K,} \hlkwc{data} \hlstd{= AX))}
+
+    \hlstd{evol[tempus} \hlopt{-} \hlnum{1}\hlstd{]} \hlkwb{<-} \hlstd{m1X}\hlopt{$}\hlstd{coefficients[}\hlstr{"G"}\hlstd{]}
+    \hlstd{plas[tempus} \hlopt{-} \hlnum{1}\hlstd{]} \hlkwb{<-} \hlstd{m1X}\hlopt{$}\hlstd{coefficients[}\hlstr{"Z"}\hlstd{]}
+    \hlstd{ecol[tempus} \hlopt{-} \hlnum{1}\hlstd{]} \hlkwb{<-} \hlstd{m1X}\hlopt{$}\hlstd{coefficients[}\hlstr{"K"}\hlstd{]}
+\hlstd{\}}
+\end{alltt}
+
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'females' not found}}\end{kframe}
+\end{knitrout}
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'females' not found}}
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'evol' not found}}
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'plas' not found}}
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'ecol' not found}}
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'evol' not found}}
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: plot.new has not been called yet}}\end{kframe}
+\end{knitrout}
+
+
+The change in relative importance of the components (sum to 1 at any time):
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'evol' not found}}
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'plas' not found}}
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'ecol' not found}}
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: plot.new has not been called yet}}\end{kframe}
+\end{knitrout}
+
+
+The mean relative importance of evolution is now:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{mean}\hlstd{(}\hlkwd{abs}\hlstd{(evol)}\hlopt{/}\hlstd{(}\hlkwd{abs}\hlstd{(evol)} \hlopt{+} \hlkwd{abs}\hlstd{(ecol)} \hlopt{+} \hlkwd{abs}\hlstd{(plas)))}
+\end{alltt}
+
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: object 'evol' not found}}\end{kframe}
+\end{knitrout}
+
+This is two time less than without considering size plasticity, but I am not more comfortable with its meaning.
+
+\end{document}
