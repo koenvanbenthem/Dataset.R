@@ -1,4 +1,24 @@
-\documentclass{article}
+\documentclass[a4paper,10pt]{article}
+
+\usepackage[USenglish]{babel} %francais, polish, spanish, ...
+\usepackage[T1]{fontenc}
+\usepackage[ansinew]{inputenc}
+\usepackage{lmodern} %Type1-font for non-english texts and characters
+%% Packages for Graphics & Figures %%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{graphicx} %%For loading graphic files
+%\usepackage{subfig} %%Subfigures inside a figure
+%\usepackage{pst-all} %%PSTricks - not useable with pdfLaTeX
+
+\usepackage{natbib}% needed for molecular ecology .bst
+\setcitestyle{citesep={;},aysep={}}% needed for molecular ecology .bst
+
+%% Line Spacing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{setspace}
+%\singlespacing        %% 1-spacing (default)
+%\onehalfspacing       %% 1,5-spacing
+\doublespacing        %% 2-spacing
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
 
 \begin{document}
 \title{Applying Ellner approach to leprechaun population dynamic}
@@ -15,7 +35,7 @@ Leprechaun are magical creatures feeding on camembert. In the population of inte
 <<loadingData, echo=F>>=
 #setwd(dir="/GitHub/Dataset.R")
 popfile<-read.table(file="pop1.csv",header=T)
-
+#I use the pop1.csv file to have a specific population to describe, not a random one.
 @
 
 Population size changes like that:
@@ -40,23 +60,140 @@ Note the general decrease in genetic variance due to directional selection on si
 \section{A decomposition attempt}
 We will try to decompose the dynamic of juvenile production into its ecological and evolutionary components. (\textit{first I wanted to decompose the population size, until I realized that this is not possible with Ellner approach, because it requires some replication to estimate the partial derivatives of the trait of interest by its components. So I used juvenile production in order to get replication at the level of individual.})
 We will consider only adult females in the decomposition of juvenile production.
-In a first section, we will decompose the trait of interest into the effect of size and the effect of camembert ownership.
-In a second section, in addition, we will split the effect of size into its genetic and plastic components.
+In a first subsection, we will decompose the trait of interest into the effect of size and the effect of camembert ownership.
+In a second subsection, we will try an extension of Ellner's decomposition method in discrete time to three components, still considering the effect of camemebert as previously, but spliting the effect of size into its genetic and plastic components.
 
 \textbf{At the moment what I am doing is probably wrong, and if it is not, you might not be able to understand what I am trying to do with the code unless you go back to Ellner's paper. I will try to improve this document soon.}
 \subsection{Phenotype and ressources}
+This is an attempt to reproduce the method applied in Becks \& al. (2012) and decribed in the section \emph{discrete time: comparing endpoints instead of instantaneaous rates} in Ellner \& al. (2011). The dynamic of a trait of interest is decomposed into two components, one identified as ecological and one identified as evolutionary. The decomposition is repeated for every pair of successive time points. 
 
-<<Females, echo=F>>=
+\subsubsection{the decomposition process}
+As a reminder this is ``Hairston equation'':
+\begin{equation}\label{simHairston2}
+\frac{dX}{dt} = \frac{\partial X}{\partial z}\frac{dz}{dt}+\frac{\partial X}{\partial k}\frac{dk}{dt}
+\end{equation}
+Where $X$ is the trait of interest of which we want to decompose the dynamic. $z$ is a trait of the organisms of interest, $k$ is an environmental variable, $t$ is time.\\
+Let us explain each term:
+\begin{itemize}
+\item $\frac{dX}{dt}$ is the temporal dynamic of the trait of interest.
+\item $\frac{\partial X}{\partial z}$ is the partial effect of $z$ on $X$. \emph{"what happens to $X$ when $z$ change of 1 unit."}
+\item $\frac{dz}{dt}$ is the temporal change of $z$. \emph{"of how many units has $z$ changed with time."}
+\item thereby $\frac{\partial X}{\partial z}\frac{dz}{dt}$ is the change in $X$ due to the change in $z$. It can be called the "evolutionary" component of change in $X$ if one assume no phenotypic plasticity.
+\item $\frac{\partial X}{\partial k}$ is the partial effect of $k$ on $X$. \emph{"what happens to $X$ when $k$ change of 1 unit."}
+\item $\frac{dk}{dt}$ is the temporal change of $k$. \emph{"of how many units has $k$ changed with time."}
+\item thereby $\frac{\partial X}{\partial k}\frac{dk}{dt}$ is the change in $X$ due to the change in $k$. It can be called the "ecological" component of change in $X$.
+\end{itemize}
+
+Koen pointed out that given the use of the equation made by Hairston and Ellner making the assumption that the effet of $z$ on $X$ is linear over the population's $z$ distribution, the second right-side term would be better written $\frac{\partial X}{\partial \bar{z}}\frac{d\bar{z}}{dt}$. In what I have done, I get the first part of the term regressing individual values of $X$ on individual values of $z$, but I use the second term with the population mean assumption. Therefore I wonder, but I guess this is not correct, I am actually asking for an explanation, whether in my case, the term could be written $\frac{\partial X}{\partial z}\frac{d\bar{z}}{dt}$.
+
+
+In our context, $X$ will be the number of offpring per female on a given year, or mean annual reproductive success (ARS), $z$ will be the animal sizes, $k$ will be the camemebert ownership and $t$ will be time.
+For each pair of successive points in time, we want an estimate of $\frac{\partial X}{\partial z}\frac{dz}{dt}$ and one of $\frac{\partial X}{\partial k}\frac{dk}{dt}$, following Becks and Ellner notations.
+Again, it might be wrong, but a more exact formulation might be 
+
+\begin{equation}\label{simHairston3}
+\frac{dX}{dt} = \frac{\partial X}{\partial z}\frac{d\bar{z}}{dt}+\frac{\partial X}{\partial k}\frac{d\bar{k}}{dt}
+\end{equation}
+
+One problem I might have is that this decomposition does not actually map the decompositions in Becks and Ellner, as $X$, $z$ and $k$ are all traits observable at the individual levels and not population-level properties. Maybe then the framework is not valid anymore or rather less interesting as the distinction between ecology and evolution is less clear: the environmental parameter is not clearly independant of individual values. However, I could not find a set of parameters with replication in our simulations that would allow me to map exactly Ellner decomposition. I still believe that it is close enough to understand in practice the principals of the decomposition.
+Because our data are simulated in discrete time, we need to use the discrete time version of Hairston's and Ellner's method. I think that this would also be the case with most empirical studies since having access to instantaneous rates of change seem challenging in practice. The discrete time method keep the the previsous equations but use them a bit less directly.
+
+At $t$ we observe $X(z_t,k_t)$ and at $t+1$ we observe $X(z_{t+1},k_{t+1})$. Becks et al. following Hairston et al., predict what would be $X(z_t,k_{t+1})$, that is to say $X$ if $k$ would change with $z$ held constant, and $X(z_{t+1},k_{t})$, that is to say $X$ if $z$ would change with $k$ held constant. These predictions and observed $X$ are used to estimate the components of $X$ dynamic, from time $t$ to time $t+1$, as follow:
+\begin{equation}
+\frac{\partial X}{\partial z}\frac{dz}{dt}=((X(z_{t+1},k_{t})-X(z_{t},k_{t}))+(X(z_{t+1},k_{t+1})-X(z_{t},k_{t+1})))/2
+\end{equation}
+and 
+\begin{equation}
+\frac{\partial X}{\partial k}\frac{dk}{dt}=((X(z_{t},k_{t+1})-X(z_{t},k_{t}))+(X(z_{t+1},k_{t+1})-X(z_{t+1},k_{t})))/2
+\end{equation}
+Which is equivalent to a two-way ANOVA explaining $X$ by the two times two crossed levels of $z$ and $k$. 
+Of course, the difficult point lies in the prediction of the $X(z_{t},k_{t+1})$ and the $X(z_{t+1},k_{t})$. They must be based on a good knowledge of the mechanism and on assumptions specific to the system. A possible approach to get them is to fit a linear model $X \sim 1 + z + k$, which gives $\frac{\partial X}{\partial z}$ and one of $\frac{\partial X}{\partial k}$. Which requires some kind of replication of the data, or an independent experiment. From that, one can predict what would be the unobserved $X$s:
+\begin{equation}
+X(z_{t},k_{t+1})=\hat{\beta_1}+\hat{\beta_z}z_{t}+\hat{\beta_k}k_{t+1}
+\end{equation}
+\begin{equation}
+X(z_{t+1},k_{t})=\hat{\beta_1}+\hat{\beta_z}z_{t+1}+\hat{\beta_k}k_{t}
+\end{equation}
+
+
+Where $\beta_1$ is the intercept and $\hat{\beta}$ is the maximum-likelihood (or equivalently least-squares as we use a linear model) estimate of the parameter $\beta$. The ANOVA approach does not let any residual degree of freedom, so there is no information about the accuracy of the estimates. However, the process is repeated numerous times (for each pair of successive time points), so the global relative importance of evolution and ecology is averaged over many (inaccurate) points.
+
+\subsubsection{A leprechaun illustration}
+We will use only adult females
+<<Females>>=
 females<-popfile[which(popfile$s=="F" & popfile$age>0),]
 @
+In a first paragraph we will see in details the calculation process for the two first time steps, and in a second paragraph, we will repeat the process for all pairs of successive time steps.
 
-<<hairston,echo=T>>=
+\paragraph{Two first time steps\\}
 
-#plot(density(log(females$ARS)))#very grossly gaussian distribution
-#### log(ARS) ~ C+z (Hairston)
+Let us first detail the method for the first pair of time steps:
+<<firstpair1>>=
+tempus=2
+ mARS0<-glm(ARS~1+C+z,
+             data=females[which(females$t==(tempus-1) | females$t==tempus),],
+             family=poisson)
+@
+This is our linear model $X \sim 1 + z + k$. We use a Poisson distribution with a log link to normalize the ARS distribution. We will back-transform the estimates to estimate the theoritical unobserved values of $X$.
 
+We extract the intercept,$\hat{\beta_1}$ and the parameter estimates $\hat{\beta_z}$ and $\hat{\beta_k}$,
+<<firstpair2>>=
+intercept<-mARS0$coefficients[1]
+dXdz<-mARS0$coefficients["z"]
+dXdk<-mARS0$coefficients["C"]
+@
+
+We calculate $z_t$, $k_t$, $z_{t+1}$ and $k_{t+1}$:
+<<firstpair3>>=
+Zt0<-mean(females$z[which(females$t==(tempus-1))])
+kt0<-mean(females$C[which(females$t==(tempus-1))])
+Zt1<-mean(females$z[which(females$t==tempus)])
+kt1<-mean(females$C[which(females$t==tempus)])
+@
+
+And here we get the $X(z_{t},k_{t})$, $X(z_{t+1},k_{t+1})$, $X(z_{t},k_{t+1})$ and $X(z_{t},k_{t+1})$:
+<<firstpair4>>=
+Xtt<-mean(females$ARS[which(females$t==(tempus-1))])
+#not exactly exp(intercept+Zt0*dXdz+kt0*dXdk)
+#I do not want to account for the interaction (??) as it is problematic for XtT and XTt
+XTT<-mean(females$ARS[which(females$t==tempus)])
+#not exactly exp(intercept+Zt1*dXdz+kt1*dXdk)
+#I do not want to account for the interaction (??) as it is problematic for XtT and XTt
+XtT<-exp(intercept+Zt0*dXdz+kt1*dXdk)
+#this is done with population mean assumption.
+#Would be impossible on an individual basis
+XTt<-exp(intercept+Zt1*dXdz+kt0*dXdk)
+#this is done with population mean assumption. 
+#Would be impossible on an individual basis
+@
+in the code the lower-case "t" means $t$ and the upper-case "T" means $t+1$.
+In the next code chunck these four $X$ values are arranged into a dataframe also containing two columns of dummy variables. The first column contains the $X$s. The second column indicates the time of the $z$ value causing the $X$ in this row: 0 indicates $z_t$; 1 indicates $z_{t+1}$. The third column indicates the time of the $k$ value causing the $X$ in this row with the same code:  0 indicates $z_t$; 1 indicates $z_{t+1}$.
+
+<<firstpair5>>=
+  AX<-as.data.frame(matrix(data=c(Xtt,XTt,XtT,XTT,0,1,0,1,0,0,1,1),ncol=3))
+  #using an anova we get the respective importance of evolution and of ecology:
+@
+The $X$s in this dataframe are now regressed on these two dummy variables, which give their relative relative importance and direction. 
+
+<<firstpair6>>=
+  m1X<-lm(V1~V2+V3,data=AX)
+  m1X$coefficients["V2"]#evolution
+  m1X$coefficients["V3"]#ecology
+  #or equivalently:
+  0.5*(XTT-XtT + XTt-Xtt)#evolution
+  0.5*(XTT-XTt + XtT-Xtt)#ecology
+@
+That's it, the "evolution" coefficient is $\frac{\partial X}{\partial z}\frac{d\bar{z}}{dt}$ and the "ecology" coefficient is $\frac{\partial X}{\partial k}\frac{d\bar{k}}{dt}$.
+
+
+\paragraph{All time steps\\}
+These two vectors will save the "evolutionary" and "ecological" contributions change between every pair of time steps for later:
+<<vectors>>=
 evol<-vector(length=max(females$t)-1)
 ecol<-vector(length=max(females$t)-1)
+@
+We repeat the exact same procedure as in the previous paragraph, but for every pair of successive time steps:
+<<hairston,echo=T,results='hide'>>=
 for (tempus in 2:max(females$t))#for every time step
 {
   mARS0<-glm(ARS~1+C+z,
@@ -72,29 +209,21 @@ for (tempus in 2:max(females$t))#for every time step
   Zt1<-mean(females$z[which(females$t==tempus)])
   kt1<-mean(females$C[which(females$t==tempus)])
   
-  Xtt<-mean(females$ARS[which(females$t==(tempus-1))]) #not exactly exp(intercept+Zt0*dXdz+kt0*dXdk)
-  #I do not want to account for the interaction (??) as it is problematic for XtT and XTt
-  XTT<-mean(females$ARS[which(females$t==tempus)])# not exactly exp(intercept+Zt1*dXdz+kt1*dXdk)
-  #I do not want to account for the interaction (??) as it is problematic for XtT and XTt
-  XtT<-exp(intercept+Zt0*dXdz+kt1*dXdk)#this is done with population mean assumption.
-  #Would be impossible on an individual basis
-  XTt<-exp(intercept+Zt1*dXdz+kt0*dXdk)#this is done with population mean assumption. 
-  #Would be impossible on an individual basis
+  Xtt<-mean(females$ARS[which(females$t==(tempus-1))])
+  XTT<-mean(females$ARS[which(females$t==tempus)])
+  XtT<-exp(intercept+Zt0*dXdz+kt1*dXdk)
+  XTt<-exp(intercept+Zt1*dXdz+kt0*dXdk)
   
   AX<-as.data.frame(matrix(data=c(Xtt,XTt,XtT,XTT,0,1,0,1,0,0,1,1),ncol=3))
   #using an anova we get the respective importance of evolution and of ecology:
   m1X<-lm(V1~V2+V3,data=AX)
   evol[tempus-1]<-m1X$coefficients["V2"]
   ecol[tempus-1]<-m1X$coefficients["V3"]
-  #or equivalently:
-  evol[tempus-1]<-0.5*(XTT-XtT + XTt-Xtt)
-  ecol[tempus-1]<-0.5*(XTT-XTt + XtT-Xtt)
-  #(really it is exactly the same)
 }
-  
 @
 
-An interesting thing is that we can detect the bottleneck episode on generation 13 quite clearly by looking at the components of trait change.(This is obvious as what happened is completely crazy and unrealistic. A single female got 284 pups while all the other females got 0 and died)
+
+A reassuring thing is that we can detect the bottleneck episode on generation 13 quite clearly by looking at the components of trait change.(This is not surprising given that what happened is completely crazy and unrealistic: a single female bore 284 pups while all the other adult females got 0 and died of starvation.)
 
   <<dev-demo4, dev='pdf', echo=F,out.width='0.9\\textwidth',fig.align='center'>>=
   plot(log(tapply(X=females$ARS,INDEX=females$t,FUN=mean)),ylim=c(-5,6),type="b",xlab="years",ylab="")#log for visual convenience
@@ -108,11 +237,12 @@ The relative importance of evolution averaged over all years is:
 <<meanImp,echo=T>>=
 mean(abs(evol)/(abs(evol)+abs(ecol)))
 @
-Yes, this is a beautiful number. I am very happy I managed to get it. Now, does somebody have any idea what this means?
+Yes, this is a beautiful number. I am very happy I managed to get it. Now, does somebody have any idea about what this means?
 
 
 \subsection{Evolution, plasticity and ressources}
 We now consider phenotypic plasticity for size as a component distinct from evolution. We use breeding values to describe the evolutionary component, which is terribly unrealistic, as the breeding values are not observable.
+I will not give so many details as the principle is exactly the same as in the previous section, but expanded to three, instead of two, components.
 
 
 <<ellner,echo=T>>=
@@ -121,7 +251,9 @@ plas<-vector(length=max(females$t)-1)
 ecol<-vector(length=max(females$t)-1)
 for (tempus in 2:max(females$t))
 {
-  mARS1<-glm(ARS~1+C+z+bvs,data=females[which(females$t==(tempus-1) | females$t==tempus),],family=poisson)
+  mARS1<-glm(ARS~1+C+z+bvs,
+             data=females[which(females$t==(tempus-1) | females$t==tempus),],
+             family=poisson)
   intercept<-mARS0$coefficients[1]
   dXdz<-mARS1$coefficients["z"]
   dXdk<-mARS1$coefficients["C"]
@@ -134,34 +266,40 @@ for (tempus in 2:max(females$t))
   kt1<-mean(females$C[which(females$t==tempus)])
   gt1<-mean(females$bvs[which(females$t==tempus)])
   
-  Xttt<-mean(females$ARS[which(females$t==(tempus-1))]) # not exactly exp(intercept+Zt0*dXdz+kt0*dXdk) I do not want to account for the interaction (??) as it is problematic for XtT and XTt
-  XTTT<-mean(females$ARS[which(females$t==tempus)])# not exactly exp(intercept+Zt1*dXdz+kt1*dXdk) I do not want to account for the interaction (??) as it is problematic for XtT and XTt
-  XttT<-exp(intercept+Zt0*dXdz+gt0*dXdg+kt1*dXdk)#this is done with population mean assumption. Would be impossible on an individual basis
-  XtTt<-exp(intercept+Zt0*dXdz+gt1*dXdg+kt0*dXdk)#this is done with population mean assumption. Would be impossible on an individual basis
-  XtTT<-exp(intercept+Zt0*dXdz+gt1*dXdg+kt1*dXdk)#this is done with population mean assumption. Would be impossible on an individual basis
-  XTtt<-exp(intercept+Zt1*dXdz+gt0*dXdg+kt0*dXdk)#this is done with population mean assumption. Would be impossible on an individual basis
-  XTtT<-exp(intercept+Zt1*dXdz+gt0*dXdg+kt1*dXdk)#this is done with population mean assumption. Would be impossible on an individual basis
-  XTTt<-exp(intercept+Zt1*dXdz+gt1*dXdg+kt0*dXdk)#this is done with population mean assumption. Would be impossible on an individual basis
+  Xttt<-mean(females$ARS[which(females$t==(tempus-1))]) 
+  XTTT<-mean(females$ARS[which(females$t==tempus)])
+  XttT<-exp(intercept+Zt0*dXdz+gt0*dXdg+kt1*dXdk)
+  XtTt<-exp(intercept+Zt0*dXdz+gt1*dXdg+kt0*dXdk)
+  XtTT<-exp(intercept+Zt0*dXdz+gt1*dXdg+kt1*dXdk)
+  XTtt<-exp(intercept+Zt1*dXdz+gt0*dXdg+kt0*dXdk)
+  XTtT<-exp(intercept+Zt1*dXdz+gt0*dXdg+kt1*dXdk)
+  XTTt<-exp(intercept+Zt1*dXdz+gt1*dXdg+kt0*dXdk)
 
-  AX<-data.frame(c(Xttt,XttT,XtTt,XtTT,XTtt,XTtT,XTTt,XTTT),c(0,0,0,0,1,1,1,1),c(0,0,1,1,0,0,1,1),c(0,1,0,1,0,1,0,1))
+  AX<-data.frame(c(Xttt,XttT,XtTt,XtTT,XTtt,XTtT,XTTt,XTTT),# the Xs
+                 c(0,0,0,0,1,1,1,1),# code for the time of mean z
+                 c(0,0,1,1,0,0,1,1),# code for the time of mean breeding value
+                 c(0,1,0,1,0,1,0,1))# code for the time of mean k
   names(AX)<-c("X","Z","G","K")
   m1X<-(lm(X~Z+G+K,data=AX))
   
-  evol[tempus-1]<-m1X$coefficients["G"]
-  plas[tempus-1]<-m1X$coefficients["Z"]
-  ecol[tempus-1]<-m1X$coefficients["K"]
+  evol[tempus-1]<-m1X$coefficients["G"]#breeding values
+  plas[tempus-1]<-m1X$coefficients["Z"]#phenotype
+  ecol[tempus-1]<-m1X$coefficients["K"]#environment
 }
 @
 
+\clearpage
+The absolute effect of the three components:
 <<dev-demo5, dev='pdf', echo=F,out.width='0.9\\textwidth',fig.align='center'>>=
 plot(log(tapply(X=females$ARS,INDEX=females$t,FUN=mean)),ylim=c(-5,6),type="b")#log to see better what is going on at g13
 points(evol,x=2:30-0.5,type="l",col="red")
 points(plas,x=2:30-0.5,type="l",col="purple")
 points(ecol,x=2:30-0.5,type="l",col="blue")
 points(abs(evol)/(abs(ecol)+abs(plas)),x=2:30-0.5,type="l",col="green")
-legend(x="topleft",legend=c("log(Noff)","Evol","Ecol","Abs(evol/ecol)"),col=c("black","red","blue","green"),lwd=2)
+legend(x="topleft",legend=c("log(Noff)","Evol","Plas","Ecol","Abs(evol/ecol)"),col=c("black","red","purple","blue","green"),lwd=2)
 @
 
+\clearpage
 The change in relative importance of the components (sum to 1 at any time):
 <<dev-demo6, dev='pdf', echo=F,out.width='0.9\\textwidth',fig.align='center'>>=
 plot(abs(evol)/(abs(ecol)+abs(plas)+abs(evol)),x=2:30-0.5,type="l",col="red",ylim=c(0,1),xlab="years",ylab="proportion")
