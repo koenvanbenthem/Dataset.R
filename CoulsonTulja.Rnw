@@ -1,12 +1,15 @@
 \documentclass{article}
 \setlength\parindent{0pt}
-
+\usepackage{mdframed}
 \begin{document}
 <<setup, cache=FALSE, include=FALSE>>=
 opts_chunk$set(dev="tikz",tidy=F,dev.args=list(pointsize=7.5))
 options(width=60)
 @
 
+\begin{mdframed}
+\textbf{Please note:} in this analysis I consider \texttt{phi} to describe the state of the individual as we counted it. If \texttt{phi[i,t]} is $0$ it means that the individual is found back dead and is thus not part of the alive population. It has to be noted anyway that not all data is updated when an individual dies. The last entry of an individual with \texttt{phi==1} will have the same values for at least \texttt{Z,ARS, AGE} as the entry where the individual was encountered dead (\texttt{phi==0}). So far I focus on females only.
+\end{mdframed}
 <<LoadingData>>=
 dat<-read.table(file="pop.csv",header=T)
 head(dat,5)
@@ -22,11 +25,107 @@ dat3<-reshape(dat2, idvar = "ID", timevar = "t", direction = "wide")
 for(i in 2:(ncol(dat3)-2)){
   plot(dat3[,i],dat3[,i+1],main=paste("Year",i-1),xlab=paste("z(",i-1,")",sep=""),ylab=paste("z(",i,")",sep=""))
 }
-temp<-dat[,-c("t","z")]
-temp<-temp[!duplicated(temp),]
-dat4<-merge(dat3,temp,by="ID")
-dat4
+#temp<-dat[,-c("t","z")]
+#temp<-temp[!duplicated(temp),]
+#dat4<-merge(dat3,temp,by="ID")
+#dat4
 @
+Let us first take a look how the average body mass in the population (in this preliminary analysis we discard all information on age structure, I will include this later.) I also calculate average offspring trait values and the number of female offspring per individual.
+<<bodymass_over_years,out.width='0.75\\textwidth'>>=
+par(mar=c(6,6,2,2))
+alive<-subset(dat,phi==1 & s=='F') # We take only the alive individuals
+alive$zoffs<-NA
+alive$g<-0
+alive$su<-0
+for(i in 1:length(alive$t)){
+  vals<-alive$z[(alive$p1==alive$ID[i] & alive$age==0 & alive$t==(alive$t[i])+1)]
+  alive$zoffs[i]<-mean(vals,na.rm=T)
+  alive$offs[i]<-length(vals[!is.na(vals)])
+  if(sum(alive$ID==alive$ID[i] & alive$t==(alive$t[i]+1))){
+    alive$su[i]<-1
+    alive$g[i]<-alive$z[alive$ID==alive$ID[i] & alive$t==(alive$t[i]+1)]-alive$z[i]
+  }
+  
+}
+alive$D<-alive$zoffs-alive$z
+alive$D[is.na(alive$D)]<-0
+means<-aggregate(alive$z,by=list(alive$t),mean)
+plot(means[,1],means[,2],type="l",xlab="t",ylab="$\\overline{Z}$")
+range<-1:(length(means[,1])-1)
+plot(means[range,1],means[(range+1),2]-means[range,2],type="l",ylab="$\\Delta \\overline{Z}$",xlab="t")
+abline(h=0,col="gray")
+@
+Now the question is what influences the changes in $\overline{Z}$ over time, is this plasticity, evolution or demography? For this we have to analyse the transitions between two consecutive timesteps.
 
+In order to do so, I first define a new covariance function (that divides by $N$ rather than $N-1$, as we discussed before. I do assume there to be no \texttt{NA}s in the datset, which should be the case for our made up dataset):
+<<covfun>>=
+mycov<-function(x,y){
+  mean(x*y)-mean(x)*mean(y)
+}
+@
+Now we calculate the actual values:
+<<decompose_that_stuff>>=
+from<-min(alive$t)
+to<-max(alive$t)-1
+#the terms:
+Wbar<-numeric(to-from+1)
+Zbar<-numeric(to-from+1)
+Sbar<-numeric(to-from+1)
+covZS<-numeric(to-from+1)
+SGbar<-numeric(to-from+1)
+Rbar<-numeric(to-from+1)
+Dbar<-numeric(to-from+1)
+covDR<-numeric(to-from+1)
+covZR<-numeric(to-from+1)
+  ZSbar<-numeric(to-from+1)
+  RDbar<-numeric(to-from+1)
+  ZRbar<-numeric(to-from+1)
+for(i in 1:(to-from+1)){
+  time<-(min(alive$t):(max(alive$t)-1))[i]
+  Ntp1<-length(alive$t[alive$t==time+1])
+  temp<-subset(alive,alive$t==time)
+  
+  Wbar[i]<-Ntp1/length(temp$t)
+  Zbar[i]<-mean(temp$z)
+  Sbar[i]<-mean(temp$su)
+  covZS[i]<-mycov(temp$z,temp$su)
+  SGbar[i]<-mean(temp$su*temp$g)
+  ZSbar[i]<-mean(temp$z*temp$su)
+  RDbar[i]<-mean(temp$offs*temp$D)
+  ZRbar[i]<-mean(temp$z*temp$offs)
+  Rbar[i]<-mean(temp$offs)
+  Dbar[i]<-mean(temp$D)
+  covDR[i]<-mycov(temp$D,temp$offs)
+  covZR[i]<-mycov(temp$z,temp$offs)
+  
+  
+}
+overall<-(1/Wbar)*Zbar*Sbar-Zbar+(1/Wbar)*(covZS+SGbar)+(1/Wbar)*(Rbar*Dbar+Zbar*Rbar+covDR+covZR)
+par(mar=c(6,6,2,2))
+plot(means[range,1],means[(range+1),2]-means[range,2],type="l",ylab="$\\Delta \\overline{Z}$",xlab="t")
+abline(h=0,col="gray")
+points(means[range,1],overall,col='red')
+@
+So at least the two calculations of $\Delta \overline{Z}$ give consistent results. Now the question is what the different terms contribute to this.
+<<moredec>>=
+DCs<-(1/Wbar)*Zbar*Sbar-Zbar
+DCr<-(1/Wbar)*(Zbar*Rbar)
+VS<-(1/Wbar)*covZS
+FS<-(1/Wbar)*covZR
+Gr<-(1/Wbar)*SGbar
+OMD<-Rbar*Dbar/Wbar
+ODC<-covDR/Wbar
+all<-cbind(DCs,DCr,VS,FS,Gr,OMD,ODC)
+par(mar=c(6,6,2,2))
+plot(means[range,1],means[(range+1),2]-means[range,2],type="l",ylab="$\\Delta \\overline{Z}$",xlab="t",ylim=range(all))
+abline(h=0,col="gray")
+points(means[range,1],overall,col='black')
+nopoints<-dim(all)[2]
+cols<-rainbow(nopoints)
+for(i in 1:(nopoints)){
+lines(means[range,1],all[,i],col=cols[i])
+}
+legend("bottomleft",legend=colnames(all),col=cols,lty=1)
+@
 
 \end{document}
