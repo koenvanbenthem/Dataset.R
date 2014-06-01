@@ -7,7 +7,11 @@ plot(popfile$z,x=popfile$C)#size depending on how many Camemberts you (leprechau
 library(ggplot2)
 qplot(x=bvs,y=z,colour=t,data=popfile)#visualize heritability and response to selection (temporal change in breeding values)
 plot(popfile$z,x=popfile$t)
-plot(popfile$bvs,x=popfile$t)#there is not much genetic variance left after 15 years!
+plot(popfile$bvs,x=popfile$t)
+plot(popfile$hunting,x=popfile$t)
+plot(popfile$bvh,x=popfile$t)
+
+mean(popfile$phi[which(popfile$t==8)])
 
 popsize<-table(popfile$t)
 

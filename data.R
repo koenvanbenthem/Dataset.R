@@ -90,7 +90,7 @@ YR<-0
 ################ Base population parameters ########
 
 MeanBirthSize<-10
-lowBoundGrowth<-1 # minimal growth rate
+lowBoundGrowth<-0.99 # minimal growth rate
 highBoundGrowth<-1.1 # maximal growth rate
 meanGrowth<-mean(runif(10000,lowBoundGrowth,highBoundGrowth)) # needed to make survival ~ size relative on age
 MeanRepro<-2
@@ -100,30 +100,53 @@ MeanCamembert<-5000
 SDCamembert<-1000
 
 
-############### Genetic determinism ################
+############### Genetic determinism Z ################
 dominance<-1 # for additive effects only, must be 0
 overdominance<-0 # non-null values generate overdominance
 
 nbLoci<-10 #number of loci controling the trait phenotype
 nbAlleles<-10 #number of existing alleles per loci
 
-gvalues<-array(data=NA,dim=c(nbAlleles,nbAlleles,nbLoci),dimnames=list(paste("A",1: nbAlleles,sep=""),paste("A",1: nbAlleles,sep=""),paste("L",1:nbLoci,sep=""))) # Initialising a matrix that will contain the genotypic effects on the/a trait
+gvaluesZ<-array(data=NA,dim=c(nbAlleles,nbAlleles,nbLoci),dimnames=list(paste("A",1: nbAlleles,sep=""),paste("A",1: nbAlleles,sep=""),paste("L",1:nbLoci,sep=""))) # Initialising a matrix that will contain the genotypic effects on the/a trait
 
 for(L in 1:nbLoci)
 {
   # Setting the effects for the homozygotes [all loci]
   effect<-abs(rnorm(n=1,mean=0,sd=1))# alter the locus importance in a realistic way (many small-effect loci, few major loci)
-  diag(gvalues[,,L])<-2*rnorm(n=dim(gvalues)[1],mean=0,sd=effect)
-  
-  
+  diag(gvaluesZ[,,L])<-2*rnorm(n=dim(gvaluesZ)[1],mean=0,sd=effect)
   # Setting the effects for the heterozygotes
   for(A in 1:(nbAlleles-1))# loop for off-diagonal = heterozygotes (additive and dominance effects)
   {
     for (D in (A+1):nbAlleles)
     {
       d<-dominance*runif(n=1,min=-0.5-overdominance,max=0.5+overdominance)
-      gvalues[A,D,L]<-(0.5-d)*gvalues[A,A,L]+(0.5+d)*gvalues[D,D,L] # mean of additive effects + dominance, over diagonal
-      gvalues[D,A,L]<-(0.5-d)*gvalues[A,A,L]+(0.5+d)*gvalues[D,D,L] # the same below diagonal    
+      gvaluesZ[A,D,L]<-(0.5-d)*gvaluesZ[A,A,L]+(0.5+d)*gvaluesZ[D,D,L] # mean of additive effects + dominance, over diagonal
+      gvaluesZ[D,A,L]<-(0.5-d)*gvaluesZ[A,A,L]+(0.5+d)*gvaluesZ[D,D,L] # the same below diagonal    
+    }
+  }
+}
+############### Genetic determinism H ################
+dominance<-1 # for additive effects only, must be 0
+overdominance<-0 # non-null values generate overdominance
+
+nbLoci<-10 #number of loci controling the trait phenotype
+nbAlleles<-10 #number of existing alleles per loci
+
+gvaluesH<-array(data=NA,dim=c(nbAlleles,nbAlleles,nbLoci),dimnames=list(paste("A",1: nbAlleles,sep=""),paste("A",1: nbAlleles,sep=""),paste("L",1:nbLoci,sep=""))) # Initialising a matrix that will contain the genotypic effects on the/a trait
+
+for(L in 1:nbLoci)
+{
+  # Setting the effects for the homozygotes [all loci]
+  effect<-abs(rnorm(n=1,mean=0,sd=1))# alter the locus importance in a realistic way (many small-effect loci, few major loci)
+  diag(gvaluesH[,,L])<-2*rnorm(n=dim(gvaluesH)[1],mean=0,sd=effect)
+  # Setting the effects for the heterozygotes
+  for(A in 1:(nbAlleles-1))# loop for off-diagonal = heterozygotes (additive and dominance effects)
+  {
+    for (D in (A+1):nbAlleles)
+    {
+      d<-dominance*runif(n=1,min=-0.5-overdominance,max=0.5+overdominance)
+      gvaluesH[A,D,L]<-(0.5-d)*gvaluesH[A,A,L]+(0.5+d)*gvaluesH[D,D,L] # mean of additive effects + dominance, over diagonal
+      gvaluesH[D,A,L]<-(0.5-d)*gvaluesH[A,A,L]+(0.5+d)*gvaluesH[D,D,L] # the same below diagonal    
     }
   }
 }
@@ -152,10 +175,13 @@ setClass(
 		Birth = "integer",
 		alive = "logical",
 		size = "numeric",
+    hunting = "numeric",
     camemberts = "integer",
 		sex = "character",
-		DNA = "matrix",
+		DNAZ = "matrix",
+		DNAH = "matrix",
     bvs = "numeric",
+    bvh = "numeric",
     ARS = "integer"
 	)
 
@@ -170,37 +196,47 @@ setMethod("show","Leprechaun",
 )
 
 setMethod("initialize","Leprechaun",function(.Object,parent1,parent2){
-	.Object@DNA<-matrix(NA,nrow=2,ncol=nbLoci)
+  .Object@DNAZ<-matrix(NA,nrow=2,ncol=nbLoci)
+  .Object@DNAH<-matrix(NA,nrow=2,ncol=nbLoci)
 	if(missing(parent1)){
 		parent1<-NA
-		#weight1<-MeanBirthSize+2*runif(1)
-		.Object@DNA[1,]<-floor(runif(nbLoci,min=1,max=nbAlleles+1))
+		.Object@DNAZ[1,]<-floor(runif(nbLoci,min=1,max=nbAlleles+1))
+		.Object@DNAH[1,]<-floor(runif(nbLoci,min=1,max=nbAlleles+1))
 	}else{
 			weight1<-pop[[parent1]]@size
-			.Object@DNA[1,]<-pop[[parent1]]@DNA[cbind(floor(runif(n=nbLoci,min=1,max=3)),1:nbLoci)]
+			.Object@DNAZ[1,]<-pop[[parent1]]@DNAZ[cbind(floor(runif(n=nbLoci,min=1,max=3)),1:nbLoci)]
+			.Object@DNAH[1,]<-pop[[parent1]]@DNAH[cbind(floor(runif(n=nbLoci,min=1,max=3)),1:nbLoci)]
 	}
 	if(missing(parent2)){
 		parent2<-NA
-		#weight2<-MeanBirthSize+2*runif(1)
-		.Object@DNA[2,]<-floor(runif(nbLoci,min=1,max=nbAlleles+1))
+		.Object@DNAZ[2,]<-floor(runif(nbLoci,min=1,max=nbAlleles+1))
+		.Object@DNAH[2,]<-floor(runif(nbLoci,min=1,max=nbAlleles+1))
 	}else{
-		#weight2<-pop[[parent2]]@size
-		.Object@DNA[2,]<-pop[[parent2]]@DNA[cbind(floor(runif(n=nbLoci,min=1,max=3)),1:nbLoci)]
+	  .Object@DNAZ[2,]<-pop[[parent2]]@DNAZ[cbind(floor(runif(n=nbLoci,min=1,max=3)),1:nbLoci)]
+	  .Object@DNAH[2,]<-pop[[parent2]]@DNAH[cbind(floor(runif(n=nbLoci,min=1,max=3)),1:nbLoci)]
 	}
 	.Object@age<-as.integer(0)
 	.Object@ID<-CID
 	.Object@pID<-c(as.integer(parent1),as.integer(parent2))
 	.Object@Birth<-as.integer(YR)
 	.Object@alive<-TRUE
-	#.Object@size<-0.5*weight1+0.5*weight2
   BreedingValueSize<-0
   for (Locus in 1:nbLoci)#take the mean of genetic values
     {
-      BreedingValueSize<-BreedingValueSize+(gvalues[ .Object@DNA[1,Locus], .Object@DNA[2,Locus], Locus]/nbLoci)
+      BreedingValueSize<-BreedingValueSize+(gvaluesZ[ .Object@DNAZ[1,Locus], .Object@DNAZ[2,Locus], Locus]/nbLoci)
     }
   .Object@bvs<-BreedingValueSize
 	size<-MeanBirthSize+BreedingValueSize
-  .Object@size<-rnorm(n=1,mean=size,sd=1)
+  .Object@size<-rnorm(n=1,mean=size,sd=0.5)
+  
+	BreedingValueHunting<-0
+	for (Locus in 1:nbLoci)#take the mean of genetic values
+	{
+	  BreedingValueHunting<-BreedingValueHunting+(gvaluesH[ .Object@DNAH[1,Locus], .Object@DNAH[2,Locus], Locus]/nbLoci)
+	}
+  .Object@bvh<-BreedingValueHunting
+  .Object@hunting<-rnorm(n=1,mean=.Object@bvh,sd=0.5)
+  
   .Object@camemberts<-as.integer(0)
   
   .Object@ARS<-as.integer(0)#annual reproductive success
@@ -208,7 +244,7 @@ setMethod("initialize","Leprechaun",function(.Object,parent1,parent2){
 	if(runif(1)>0.5){.Object@sex<-'F'}else{.Object@sex<-'M'}
 
 	CID<<-as.integer(CID+1)
-	
+  
 	return(.Object)
 })
 
@@ -284,6 +320,13 @@ setMethod("Size","Leprechaun",function(Object){
   return(Object@size)
 })
 
+# Retrieving the hunting quality of an individual
+setGeneric("Hunting",function(Object){standardGeneric("Hunting")})
+
+setMethod("Hunting","Leprechaun",function(Object){
+  return(Object@hunting)
+})
+
 # Retrieving the sex of an individual
 setGeneric("Sex",function(Object){standardGeneric("Sex")})
 
@@ -296,7 +339,7 @@ setGeneric("Num_off",function(Object){standardGeneric("Num_off")})
 
 setMethod("Num_off","Leprechaun",function(Object){
   sizeDeviation<-Object@size-MeanBirthSize*meanGrowth^Object@age    
-  lambda<-exp(log(MeanRepro)+fertilitySelection1*sizeDeviation+fertilitySelection2*sizeDeviation^2+camembertSelection*(sqrt(Object@camemberts)-survivalPenaltyForRepro))
+  lambda<-exp(log(MeanRepro)+fertilitySelection1*sizeDeviation+fertilitySelection2*sizeDeviation^2+camembertSelection*((Object@camemberts)^(1/3)-survivalPenaltyForRepro))
   repro<-rpois(n=1,lambda=lambda)
   Object@ARS<-as.integer(repro)
 	return(Object)
@@ -330,25 +373,26 @@ ALIVE<-1:length(pop)
 
 filename<-"pop.csv"
 
-cat("t\tID\tz\tbvs\tC\ts\tARS\tage\tp1\tp2\tphi",file=filename,append=FALSE)
+cat("t\tID\tz\tbvs\thunting\tbvh\tC\ts\tARS\tage\tp1\tp2\tphi",file=filename,append=FALSE)
 
 ############### The start of time
-for(YR in 1:18){
+for(YR in 1:30){
   camembert<-abs(round(rnorm(n=1,mean=MeanCamembert,sd=SDCamembert),digits=0)) # ressources for year YR
   
   print_info(YR,ALIVE,CID,camembert)
 
 	#### Competition for ressources
-  SizesAlive<-as.numeric(lapply(pop,Size))[ALIVE]
+  HuntingAlive<-as.numeric(lapply(pop,Hunting))[ALIVE]
   #HunterQualities<-rep(x=1/length(ALIVE),length(ALIVE))# here completely random. prob can introduce quality for competition
-  HunterQualities<-exp(SizesAlive)/sum(exp(SizesAlive))# here larger individual have a strong advantage in the competition
+  HunterQualities<- abs(HuntingAlive - mean(HuntingAlive)) # here the most original individuals have a strong advantage in the competition (f-dpd selection)
+  if(sum(HunterQualities)==0){HunterQualities=rep(x=1,length(HunterQualities))}
   podium<-table(sample(as.character(ALIVE),size=camembert,replace=T,prob=HunterQualities)) 
   for(i in 1:length(podium)){
     pop[[as.integer(names(podium))[i]]]<-Food(pop[[as.integer(names(podium))[i]]])
   }
   
-  	#### Survival
-  	DEAD<-c()
+  #### Survival
+  DEAD<-c()
 	pop[ALIVE]<-lapply(pop[ALIVE],Surv)
 	ALIVE<-ALIVE[!(ALIVE %in% DEAD)]
 	
@@ -393,10 +437,10 @@ for(YR in 1:18){
 	}
 	### Everything should be written to a dataframe, to make sure we have all the values for ever and ever
   for(i in ALIVE){
-    cat("\n",YR,"\t",pop[[i]]@ID,"\t",pop[[i]]@size,"\t",pop[[i]]@bvs,"\t",pop[[i]]@camemberts,"\t",pop[[i]]@sex,"\t",pop[[i]]@ARS,"\t",pop[[i]]@age,"\t",pop[[i]]@pID[1],"\t",pop[[i]]@pID[2],"\t",1,file=filename,append=TRUE)
+    cat("\n",YR,"\t",pop[[i]]@ID,"\t",pop[[i]]@size,"\t",pop[[i]]@bvs,"\t",pop[[i]]@hunting,"\t",pop[[i]]@bvh,"\t",pop[[i]]@camemberts,"\t",pop[[i]]@sex,"\t",pop[[i]]@ARS,"\t",pop[[i]]@age,"\t",pop[[i]]@pID[1],"\t",pop[[i]]@pID[2],"\t",1,file=filename,append=TRUE)
   }
   for(i in DEAD){
-    cat("\n",YR,"\t",pop[[i]]@ID,"\t",pop[[i]]@size,"\t",pop[[i]]@bvs,"\t",pop[[i]]@camemberts,"\t",pop[[i]]@sex,"\t",pop[[i]]@ARS,"\t",pop[[i]]@age,"\t",pop[[i]]@pID[1],"\t",pop[[i]]@pID[2],"\t",0,file=filename,append=TRUE)
+    cat("\n",YR,"\t",pop[[i]]@ID,"\t",pop[[i]]@size,"\t",pop[[i]]@bvs,"\t",pop[[i]]@hunting,"\t",pop[[i]]@bvh,"\t",pop[[i]]@camemberts,"\t",pop[[i]]@sex,"\t",pop[[i]]@ARS,"\t",pop[[i]]@age,"\t",pop[[i]]@pID[1],"\t",pop[[i]]@pID[2],"\t",0,file=filename,append=TRUE)
   }
 }
 
