@@ -1,16 +1,44 @@
 ## This function defines how time progresses for our lovely population
+filename<-task$filename
+SurvivalSelection1<-task$SS1
+SurvivalSelection2<-task$SS2
+fertilitySelection1<-task$fs1
+fertilitySelection2<-task$fs2
+camembertSelection<-task$cs
+SDCamembert<-task$sdc
+## Extracting the parameters from the task object
+
+################ Counter for the IDs ###############
+CID<-as.integer(1) 
+
+################ Environmental parameters ##########
+MeanCamembert<-5000
+#SDCamembert<-1000
+
+lowBoundGrowth<-0.99 # minimal growth rate
+highBoundGrowth<-1.1 # maximal growth rate
 
 
+################ Base population parameters ########
+MeanBirthSize<-10
+# needed to make survival ~ size relative on age
+meanGrowth<-prod(runif(10000,lowBoundGrowth,highBoundGrowth))^(1/10000)
+MeanRepro<-2
+
+survivalPenaltyForRepro<-0
+
+YR<-0
 ############### Creating an initial population with 30 individuals
+
 pop<-c(new("Leprechaun"))
 for(i in 2:30){
   pop<-c(pop,new("Leprechaun"))
 }
+
 ############### List of living individuals [their indices], this will save time later, because dead individuals are not looped over
 ALIVE<-1:length(pop)
 
 cat("t\tID\tz\tbvs\thunting\tbvh\tC\ts\tARS\tage\tp1\tp2\tphi",file=filename,append=FALSE)
-
 
 ############### The start of time
 for(YR in 1:30){

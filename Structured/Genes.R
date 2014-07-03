@@ -1,5 +1,8 @@
 ## Setting the Genetic maps
 
+SDZ<-1
+SDH<-1
+
 ############### Genetic determinism Z ################
 dominance<-1 # for additive effects only, must be 0
 overdominance<-0 # non-null values generate overdominance

@@ -3,7 +3,6 @@
 ####################################################
 ############### Definition of the class ############
 ####################################################
-
 setClass(
   Class="Leprechaun",
   representation=representation(
