@@ -20,9 +20,10 @@ descrip <- descrip[order(descrip$filename),] # same ordre as filenames
 # Remove populations with <n individuals
 n <- 50
 exl <- c(which(unlist(lapply(allData,function(x)dim(x)[1])) < n))
-allData <- allData [-exl]
-descrip <- descrip[-exl,]
-
+if (length(exl) > 0) {
+	allData <- allData [-exl]
+	descrip <- descrip[-exl,]
+}
 
 ############################################
 ################# Run! #####################
