@@ -94,10 +94,10 @@ cat("filename\tSS1\tSS2\tFS1\tFS2\tCAMSEL\tSDCAM",file=converter,append=FALSE)
 # for(SDCamembert in c(1000)){
   
 SurvivalSelection1<-0.1 #linear coefficient on a logit scale for Survival ~ ... + size +size^2
-SurvivalSelection2<-(-0.01) #quadratic coefficient on a logit scale for Survival ~ ... + size + size^2; negative value=balancing selection
+SurvivalSelection2<-(0.0) #quadratic coefficient on a logit scale for Survival ~ ... + size + size^2; negative value=balancing selection
 
 fertilitySelection1<-0.1 #linear coefficient on a log scale for reproduction ~ ... + size + size^2
-fertilitySelection2<-(-0.01) #quadratic coefficient on a log scale for reproduction ~ ... + size + size^2; negative value=balancing selection
+fertilitySelection2<-(0.0) #quadratic coefficient on a log scale for reproduction ~ ... + size + size^2; negative value=balancing selection
 
 camembertSelection<-0.1 #increases the number of offspring, multiplied by Number Of Camemberts at the power 1/3 (because its a volume, uhuh)
 survivalPenaltyForRepro<-0
@@ -187,6 +187,13 @@ for(L in 1:nbLoci)
     }
   }
 }
+
+
+
+#vector of expected sizes for all ages:
+age<-1:20
+highBoundGrowthAge<-(highBoundGrowth+age-1)/age 
+Growth<-sapply(X = highBoundGrowthAge,FUN = function(x){mean(runif(1000,lowBoundGrowth,x))})
 
 ####################################################
 ############### Definition of the class ############
@@ -292,7 +299,9 @@ bathtub<-function(age){
 
 # Incorporate the effect of size to the survival function
 sizeSurvival<-function(age,size,camemberts){
-  sizedeviation<-size-(MeanBirthSize*meanGrowth^age)
+  
+  sizedeviation<-size-(MeanBirthSize*prod(Growth[1:age]))
+
   p<-bathtub(age)
   if(p<1)#because size does not prevent animals of maximal age to die out
     {
