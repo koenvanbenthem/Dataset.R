@@ -94,10 +94,10 @@ cat("filename\tSS1\tSS2\tFS1\tFS2\tCAMSEL\tSDCAM",file=converter,append=FALSE)
 # for(SDCamembert in c(1000)){
   
 SurvivalSelection1<-0.1 #linear coefficient on a logit scale for Survival ~ ... + size +size^2
-SurvivalSelection2<-(0) #quadratic coefficient on a logit scale for Survival ~ ... + size + size^2; negative value=balancing selection
+SurvivalSelection2<-(-0.01) #quadratic coefficient on a logit scale for Survival ~ ... + size + size^2; negative value=balancing selection
 
 fertilitySelection1<-0.1 #linear coefficient on a log scale for reproduction ~ ... + size + size^2
-fertilitySelection2<-(0) #quadratic coefficient on a log scale for reproduction ~ ... + size + size^2; negative value=balancing selection
+fertilitySelection2<-(-0.01) #quadratic coefficient on a log scale for reproduction ~ ... + size + size^2; negative value=balancing selection
 
 camembertSelection<-0.1 #increases the number of offspring, multiplied by Number Of Camemberts at the power 1/3 (because its a volume, uhuh)
 survivalPenaltyForRepro<-0
@@ -140,7 +140,7 @@ YR<-0
 MeanBirthSize<-10
 # needed to make survival ~ size relative on age
 meanGrowth<-prod(runif(10000,lowBoundGrowth,highBoundGrowth))^(1/10000)
-MeanRepro<-0.5
+MeanRepro<-10
 
 ############### Genetic determinism Z ################
 dominance<-1 # for additive effects only, must be 0
@@ -284,7 +284,7 @@ setMethod("initialize","Leprechaun",function(.Object,parent1,parent2){#parent1 i
 
 # Implementing the famous bathtub, ages 1 to 20
 bathtub<-function(age){
-  p<-0.6*exp(-age/4)+(-1+exp(age*log(2)/20))
+  p<-0.4*exp(-age/4)+(-1+exp(age*log(2)/20))
   p[p>1]<-1
   return(p)
 }
@@ -370,8 +370,8 @@ setMethod("Sex","Leprechaun",function(Object){
 setGeneric("Num_off",function(Object){standardGeneric("Num_off")})
 
 setMethod("Num_off","Leprechaun",function(Object){  
-  lambda<-exp(log(MeanRepro)+fertilitySelection1*Object@size+fertilitySelection2*Object@size^2
-                +camembertSelection*((Object@camemberts)-survivalPenaltyForRepro)/10)
+  lambda<-exp(log(MeanRepro)+fertilitySelection1*Object@size/10+fertilitySelection2*(Object@size/10)^2
+                +camembertSelection*((Object@camemberts)^(1/3)-survivalPenaltyForRepro)/10)
   repro<-rpois(n=1,lambda=lambda)
   
   logitV<-Object@age-SexualMaturity
@@ -420,7 +420,7 @@ for(YR in 1:30){
   HunterQualities<-HunterQualities-2*min(HunterQualities)+mean(HunterQualities)
   #HunterQualities<-rep(x=1/length(ALIVE),length(ALIVE))# here completely random. prob can introduce quality for competition
   #HunterQualities<- abs(HuntingAlive - mean(HuntingAlive)) # here the most original individuals have a strong advantage in the competition (f-dpd selection)
-  #if(sum(HunterQualities)==0){HunterQualities=rep(x=1,length(HunterQualities))}
+  if(length(HunterQualities)==1){HunterQualities=1}
   
   podium<-table(factor(sample(as.character(ALIVE),size=camembert,replace=T,prob=HunterQualities),levels=ALIVE))
   camams<-as.numeric(podium[match(ALIVE,names(podium))])
