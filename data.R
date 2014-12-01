@@ -83,20 +83,20 @@ folder<-"StrongerSSMoreAndAlsoASecondOrderTerm"
 converter<-paste("Data/",folder,"/conv.csv",sep="")
 dir.create(file.path("Data", folder))
 cat("filename\tSS1\tSS2\tFS1\tFS2\tCAMSEL\tSDCAM",file=converter,append=FALSE)
-for(SurvivalSelection1 in seq(1,5,0.1)){
-for(SurvivalSelection2 in c(-0.01)){
-for(fertilitySelection1 in c(0.1)){
-for(fertilitySelection2 in c(-0.01)){
-for(camembertSelection in c(0.1)){
-for(SDCamembert in c(1000)){
+# for(SurvivalSelection1 in C(0.1)){
+# for(SurvivalSelection2 in c(0)){
+# for(fertilitySelection1 in c(0.1)){
+# for(fertilitySelection2 in c(0)){
+# for(camembertSelection in c(0)){
+# for(SDCamembert in c(1000)){
   
-#SurvivalSelection1<-0.1 #linear coefficient on a logit scale for Survival ~ ... + size +size^2
-#SurvivalSelection2<-(-0.01) #quadratic coefficient on a logit scale for Survival ~ ... + size + size^2; negative value=balancing selection
+SurvivalSelection1<-0.1 #linear coefficient on a logit scale for Survival ~ ... + size +size^2
+SurvivalSelection2<-(0) #quadratic coefficient on a logit scale for Survival ~ ... + size + size^2; negative value=balancing selection
 
-#fertilitySelection1<-0.1 #linear coefficient on a log scale for reproduction ~ ... + size + size^2
-#fertilitySelection2<-(-0.01) #quadratic coefficient on a log scale for reproduction ~ ... + size + size^2; negative value=balancing selection
+fertilitySelection1<-0.1 #linear coefficient on a log scale for reproduction ~ ... + size + size^2
+fertilitySelection2<-(0) #quadratic coefficient on a log scale for reproduction ~ ... + size + size^2; negative value=balancing selection
 
-#camembertSelection<-0.1
+camembertSelection<-0.1 #increases the number of offspring, multiplied by Number Of Camemberts at the power 1/3 (because its a volume, uhuh)
 survivalPenaltyForRepro<-0
 
 SDZ<-1
@@ -105,10 +105,16 @@ SDH<-1
 
 ################ Environmental parameters ##########
 MeanCamembert<-5000
-#SDCamembert<-1000
+SDCamembert<-1000
 
 lowBoundGrowth<-0.99 # minimal growth rate
 highBoundGrowth<-1.1 # maximal growth rate
+
+PlasticityBirthSize<-1
+PlasticityHunting<-0
+MaternalEffect<-0.1
+
+SexualMaturity<-4 #the 50% reproductive size 
 
 filename<-paste("Data/",folder,"/pop_SS1_",SurvivalSelection1*10,"_SS2_",SurvivalSelection2*100,"_FS1_",fertilitySelection1*10,
                 "_FS2_",fertilitySelection2*100,"_CAMSEL_",camembertSelection*10,"_SDCAM_",SDCamembert,".csv",sep="")
@@ -131,7 +137,7 @@ YR<-0
 MeanBirthSize<-10
 # needed to make survival ~ size relative on age
 meanGrowth<-prod(runif(10000,lowBoundGrowth,highBoundGrowth))^(1/10000)
-MeanRepro<-2
+MeanRepro<-0.5
 
 ############### Genetic determinism Z ################
 dominance<-1 # for additive effects only, must be 0
@@ -159,11 +165,6 @@ for(L in 1:nbLoci)
   }
 }
 ############### Genetic determinism H ################
-dominance<-1 # for additive effects only, must be 0
-overdominance<-0 # non-null values generate overdominance
-
-nbLoci<-10 #number of loci controling the trait phenotype
-nbAlleles<-10 #number of existing alleles per loci
 
 gvaluesH<-array(data=NA,dim=c(nbAlleles,nbAlleles,nbLoci),dimnames=list(paste("A",1: nbAlleles,sep=""),paste("A",1: nbAlleles,sep=""),paste("L",1:nbLoci,sep=""))) # Initialising a matrix that will contain the genotypic effects on the/a trait
 
@@ -217,7 +218,7 @@ setMethod("show","Leprechaun",
 	}
 )
 
-setMethod("initialize","Leprechaun",function(.Object,parent1,parent2){
+setMethod("initialize","Leprechaun",function(.Object,parent1,parent2){#parent1 is the mother
   .Object@DNAZ<-matrix(NA,nrow=2,ncol=nbLoci)
   .Object@DNAH<-matrix(NA,nrow=2,ncol=nbLoci)
 	if(missing(parent1)){
@@ -249,7 +250,12 @@ setMethod("initialize","Leprechaun",function(.Object,parent1,parent2){
     }
   .Object@bvs<-BreedingValueSize
 	size<-MeanBirthSize+BreedingValueSize
-  .Object@size<-rnorm(n=1,mean=size,sd=0) # sd plasticity birth size
+  
+  if(!is.na(parent1)){
+  size<-size+MaternalEffect*pop[[parent1]]@size
+  }
+  .Object@size<-abs(rnorm(n=1,mean=size,sd=PlasticityBirthSize)) # sd plasticity birth size
+  
   
 	BreedingValueHunting<-0
 	for (Locus in 1:nbLoci)#take the mean of genetic values
@@ -257,7 +263,7 @@ setMethod("initialize","Leprechaun",function(.Object,parent1,parent2){
 	  BreedingValueHunting<-BreedingValueHunting+(gvaluesH[ .Object@DNAH[1,Locus], .Object@DNAH[2,Locus], Locus]/nbLoci)
 	}
   .Object@bvh<-BreedingValueHunting
-  .Object@hunting<-rnorm(n=1,mean=.Object@bvh,sd=0.5) # sd plasticity hunting quality
+  .Object@hunting<-rnorm(n=1,mean=.Object@bvh,sd=PlasticityHunting) # sd plasticity hunting quality
   
   .Object@camemberts<-as.integer(0)
   
@@ -270,7 +276,6 @@ setMethod("initialize","Leprechaun",function(.Object,parent1,parent2){
 	return(.Object)
 })
 
-
 ################### Definition of more biologically relevant methods (e.g. survival)
 ####################################################################################
 
@@ -280,6 +285,12 @@ bathtub<-function(age){
   p[p>1]<-1
   return(p)
 }
+
+plot(curve(bathtub,from = 0,to=20),ylim=c(0,1))
+
+points(curve(1-sizeSurvival(x,30,50),from = 0,to=20,add=T))
+points(curve(1-sizeSurvival(x,30,3005),from = 0,to=20,add=T))
+
 
 # Incorporate the effect of size to the survival function
 sizeSurvival<-function(age,size,camemberts){
@@ -359,13 +370,17 @@ setMethod("Sex","Leprechaun",function(Object){
 # Calculating the number of offspring for a females
 setGeneric("Num_off",function(Object){standardGeneric("Num_off")})
 
-setMethod("Num_off","Leprechaun",function(Object){
-  sizeDeviation<-Object@size-MeanBirthSize*meanGrowth^Object@age    
-  lambda<-exp(log(MeanRepro)+fertilitySelection1*sizeDeviation+fertilitySelection2*sizeDeviation^2+camembertSelection*((Object@camemberts)^(1/3)-survivalPenaltyForRepro))
+setMethod("Num_off","Leprechaun",function(Object){  
+  lambda<-exp(log(MeanRepro)+fertilitySelection1*Object@size+fertilitySelection2*Object@size^2
+                +camembertSelection*((Object@camemberts)-survivalPenaltyForRepro)/10)
   repro<-rpois(n=1,lambda=lambda)
-  Object@ARS<-as.integer(repro)
+  
+  logitV<-Object@age-SexualMaturity
+  p<-1/(1+exp(-logitV))
+  Object@ARS<-as.integer(repro)*rbinom(1,size = 1,prob = p)
 	return(Object)
 })
+
 
 # Function for camembert attributions 
 setGeneric("Food",function(Object,Camams){standardGeneric("Food")})
@@ -402,10 +417,11 @@ for(YR in 1:30){
   #print_info(YR,ALIVE,CID,camembert)
 
 	#### Competition for resources
-  HuntingAlive<-as.numeric(lapply(pop[ALIVE],Hunting))
+  HunterQualities<-as.numeric(lapply(pop[ALIVE],Hunting))
+  HunterQualities<-HunterQualities-2*min(HunterQualities)+mean(HunterQualities)
   #HunterQualities<-rep(x=1/length(ALIVE),length(ALIVE))# here completely random. prob can introduce quality for competition
-  HunterQualities<- abs(HuntingAlive - mean(HuntingAlive)) # here the most original individuals have a strong advantage in the competition (f-dpd selection)
-  if(sum(HunterQualities)==0){HunterQualities=rep(x=1,length(HunterQualities))}
+  #HunterQualities<- abs(HuntingAlive - mean(HuntingAlive)) # here the most original individuals have a strong advantage in the competition (f-dpd selection)
+  #if(sum(HunterQualities)==0){HunterQualities=rep(x=1,length(HunterQualities))}
   
   podium<-table(factor(sample(as.character(ALIVE),size=camembert,replace=T,prob=HunterQualities),levels=ALIVE))
   camams<-as.numeric(podium[match(ALIVE,names(podium))])
