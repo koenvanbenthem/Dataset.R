@@ -289,11 +289,6 @@ bathtub<-function(age){
   return(p)
 }
 
-plot(curve(bathtub,from = 0,to=20),ylim=c(0,1))
-
-points(curve(1-sizeSurvival(x,30,50),from = 0,to=20,add=T))
-points(curve(1-sizeSurvival(x,30,3005),from = 0,to=20,add=T))
-
 
 # Incorporate the effect of size to the survival function
 sizeSurvival<-function(age,size,camemberts){
