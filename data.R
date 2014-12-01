@@ -79,10 +79,13 @@
 
 
 ############### Selection parameters ###############
-folder<-"StrongerSSMoreAndAlsoASecondOrderTerm"
+folder<-"Simple"
 converter<-paste("Data/",folder,"/conv.csv",sep="")
 dir.create(file.path("Data", folder))
 cat("filename\tSS1\tSS2\tFS1\tFS2\tCAMSEL\tSDCAM",file=converter,append=FALSE)
+
+
+
 # for(SurvivalSelection1 in C(0.1)){
 # for(SurvivalSelection2 in c(0)){
 # for(fertilitySelection1 in c(0.1)){
@@ -335,7 +338,8 @@ setMethod("Age","Leprechaun",function(Object){
 setGeneric("Grow",function(Object){standardGeneric("Grow")})
 
 setMethod("Grow","Leprechaun",function(Object){
-	Object@size<-Object@size*runif(1,lowBoundGrowth,highBoundGrowth)
+  highBoundGrowthAge<-(highBoundGrowth+Object@age-1)/Object@age #maximal growth converge to 1 with increasing age
+	Object@size<-Object@size*runif(1,lowBoundGrowth,highBoundGrowthAge)# but the animal can always shrink
 	return(Object)
 })
 
@@ -485,6 +489,3 @@ for(YR in 1:30){
     cat("\n",YR,"\t",pop[[i]]@ID,"\t",pop[[i]]@size,"\t",pop[[i]]@bvs,"\t",pop[[i]]@hunting,"\t",pop[[i]]@bvh,"\t",pop[[i]]@camemberts,"\t",pop[[i]]@sex,"\t",pop[[i]]@ARS,"\t",pop[[i]]@age,"\t",pop[[i]]@pID[1],"\t",pop[[i]]@pID[2],"\t",0,file=filename,append=TRUE)
   }
 }
-
-}}}}}}
-
