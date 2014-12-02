@@ -76,39 +76,41 @@
 ####################################################%
 ################ GLOBAL VARIABLES AND COUNTERS #####
 ####################################################%
-folder<-"Simple"
-converter<-paste("Data/",folder,"/conv.csv",sep="")
-dir.create(file.path("Data", folder))
-cat("filename\tSS1\tSS2\tFS1\tFS2\tCAMSEL\tSDCAM",file=converter,append=FALSE)
 
 ################ Random seed #######################
 #set.seed(12)
 
 
-LeprechaunSimul<-function(SurvivalSelection1=0.1,SurvivalSelection2=0,fertilitySelection1=0.1,fertilitySelection2=0,
-                          camembertSelection=0.1,survivalPenaltyForRepro=0,MeanCamembert=5000,SDCamembert=1000,
-                          MeanBirthSize=10,lowBoundGrowth=0.99,highBoundGrowth=1.5,SexualMaturity=4,
-                          PlasticityBirthSize=1,PlasticityHunting=0,MaternalEffect=0.1,MeanRepro=10){
+LeprechaunSimul<-function(DIR= "Data/simple",SurvivalSelection1=0.1,SurvivalSelection2=0,fertilitySelection1=0.1,fertilitySelection2=0,
+                          camembertSelection=0.1,SurvivalPenaltyForRepro=0.2,MeanCamembert=5000,SDCamembert=1000,
+                          MeanBirthSize=10,lowBoundGrowth=0.99,highBoundGrowth=1.5,SexualMaturity=1,
+                          PlasticityBirthSize=1,PlasticityHunting=0,MaternalEffect=0.1,MeanRepro=10,
+                          StudyLength=30,InitialPopSize=100){
+  #folder<-"Simple"
+  converter<-paste(DIR,"/conv.csv",sep="")
+  #dir.create(file.path("Data", folder))
+  cat("filename\tSS1\tSS2\tFS1\tFS2\tCAMSEL\tSDCAM",file=converter,append=FALSE)
+  
+#   
+# SurvivalSelection1<-0.1 #linear coefficient on a logit scale for Survival ~ ... + size +size^2
+# SurvivalSelection2<-(0.0) #quadratic coefficient on a logit scale for Survival ~ ... + size + size^2; negative value=balancing selection
+# fertilitySelection1<-0.1 #linear coefficient on a log scale for reproduction ~ ... + size + size^2
+# fertilitySelection2<-(0.0) #quadratic coefficient on a log scale for reproduction ~ ... + size + size^2; negative value=balancing selection
+# camembertSelection<-0.1 #increases the number of offspring, multiplied by Number Of Camemberts at the power 1/3 (because its a volume, uhuh)
+# survivalPenaltyForRepro<-0
+# ############### Environmental parameters ##########
+# MeanCamembert<-5000
+# SDCamembert<-1000
+# lowBoundGrowth<-0.99 # minimal growth rate
+# highBoundGrowth<-1.5 # maximal growth rate
+# PlasticityBirthSize<-1
+# PlasticityHunting<-0
+# MaternalEffect<-0.1
+# SexualMaturity<-4 #the 50% reproductive size 
+# MeanBirthSize<-10
+# MeanRepro<-10
 
-#SurvivalSelection1<-0.1 #linear coefficient on a logit scale for Survival ~ ... + size +size^2
-#SurvivalSelection2<-(0.0) #quadratic coefficient on a logit scale for Survival ~ ... + size + size^2; negative value=balancing selection
-#fertilitySelection1<-0.1 #linear coefficient on a log scale for reproduction ~ ... + size + size^2
-#fertilitySelection2<-(0.0) #quadratic coefficient on a log scale for reproduction ~ ... + size + size^2; negative value=balancing selection
-#camembertSelection<-0.1 #increases the number of offspring, multiplied by Number Of Camemberts at the power 1/3 (because its a volume, uhuh)
-#survivalPenaltyForRepro<-0
-################ Environmental parameters ##########
-#MeanCamembert<-5000
-#SDCamembert<-1000
-#lowBoundGrowth<-0.99 # minimal growth rate
-#highBoundGrowth<-1.5 # maximal growth rate
-#PlasticityBirthSize<-1
-#PlasticityHunting<-0
-#MaternalEffect<-0.1
-#SexualMaturity<-4 #the 50% reproductive size 
-#MeanBirthSize<-10
-#MeanRepro<-10
-
-filename<-paste("Data/",folder,"/pop_SS1_",SurvivalSelection1*10,"_SS2_",SurvivalSelection2*100,"_FS1_",fertilitySelection1*10,
+filename<-paste(DIR,"/pop_SS1_",SurvivalSelection1*10,"_SS2_",SurvivalSelection2*100,"_FS1_",fertilitySelection1*10,
                 "_FS2_",fertilitySelection2*100,"_CAMSEL_",camembertSelection*10,"_SDCAM_",SDCamembert,".csv",sep="")
 cat("\n",filename,"\t",SurvivalSelection1,"\t",SurvivalSelection2,"\t",fertilitySelection1,"\t",fertilitySelection2,"\t",camembertSelection,"\t",SDCamembert,file=converter,append=TRUE)
 
@@ -152,9 +154,11 @@ SDH<-1#standard deviation of locus effect on hunting
     return(gvalues)
     }
 ############### Genetic determinism Z
-gvaluesZ<-FunctionGvalues(nbLoci = 10,nbAlleles = 10,dominance = 0.1,overdominance = 0,SD=SDZ)
+gvaluesZ<-FunctionGvalues(nbLoci = nbLoci,nbAlleles = nbAlleles,dominance = dominance,overdominance = overdominance,SD=SDZ)
 ############### Genetic determinism H 
-gvaluesH<-FunctionGvalues(nbLoci = 10,nbAlleles = 10,dominance = 0.5,overdominance = 0,SD=SDH)
+#gvaluesH<-FunctionGvalues(nbLoci = nbLoci,nbAlleles = nbAlleles,dominance = dominance,overdominance = overdominance,SD=SDH)
+gvaluesH<-FunctionGvalues(nbLoci = nbLoci,nbAlleles = nbAlleles,dominance = dominance,overdominance = overdominance,SD=0)
+
 
 #######vector of expected sizes for all ages#####
 age<-1:20
@@ -264,7 +268,7 @@ bathtub<-function(age){
 
 
 # Incorporate the effect of size to the survival function
-sizeSurvival<-function(age,size,camemberts){
+sizeSurvival<-function(age,size,camemberts,ARS){
   
   #sizedeviation<-size-(MeanBirthSize*prod(Growth[1:(age+1)]))
 
@@ -272,7 +276,7 @@ sizeSurvival<-function(age,size,camemberts){
   if(p<1)#because size does not prevent animals of maximal age to die out
     {
       plogit<-log(p/(1-p))
-      Philogit<-plogit-SurvivalSelection1*(size-15)-SurvivalSelection2*(size-15)^2
+      Philogit<-plogit-SurvivalSelection1*(size-15)-SurvivalSelection2*(size-15)^2+ARS*SurvivalPenaltyForRepro
       p<-exp(Philogit)/(1+exp(Philogit))
       if(camemberts<100)
         {
@@ -287,7 +291,7 @@ setGeneric("Surv",function(Object){standardGeneric("Surv")})
 
 setMethod("Surv","Leprechaun",function(Object){
 	
-	if(runif(1)>sizeSurvival(Object@age,Object@size,Object@camemberts)){
+	if(runif(1)>sizeSurvival(Object@age,Object@size,Object@camemberts,Object@ARS)){
 		Object@alive<-FALSE
 		DEAD<<-c(DEAD,Object@ID)
 	}
@@ -347,11 +351,11 @@ setGeneric("Num_off",function(Object){standardGeneric("Num_off")})
 setMethod("Num_off","Leprechaun",function(Object){  
   lambda<-exp(log(MeanRepro)+fertilitySelection1*(Object@size-MeanBirthSize)/10+fertilitySelection2*((Object@size-MeanBirthSize)/10)^2
                 +camembertSelection*((Object@camemberts)^(1/3)-survivalPenaltyForRepro)/10)
-  repro<-rpois(n=1,lambda=lambda)
+  repro<-rpois(n=1,lambda=lambda)+1
   
   logitV<-Object@age-SexualMaturity
   p<-1/(1+exp(-logitV))
-  Object@ARS<-as.integer(repro)*rbinom(1,size = 1,prob = p)
+  Object@ARS<-as.integer(repro)*rbinom(1,size = 1,prob = p)*disaster[YR]
 	return(Object)
 })
 
@@ -364,10 +368,9 @@ setMethod("Food","Leprechaun",function(Object,Camams){
   return(Object)
 })
 
-
 ############### Creating an initial population with 100 individuals#######
 pop<-c(new("Leprechaun"))
-for(i in 2:100){
+for(i in 2:InitialPopSize){
 	pop<-c(pop,new("Leprechaun"))
 }
 ############### Function for printing values########
@@ -384,17 +387,18 @@ ALIVE<-1:length(pop)
 
 cat("t\tID\tz\tbvs\thunting\tbvh\tC\ts\tARS\tage\tp1\tp2\tphi",file=filename,append=FALSE)
 
+disaster<-as.integer(rep(c(1,1,1),times = 1+StudyLength/3))
+
 ############### The start of time
-for(YR in 1:30){
+for(YR in 1:StudyLength){
   camembert<-abs(round(rnorm(n=1,mean=MeanCamembert,sd=SDCamembert),digits=0)) # resources for year YR
   
   #print_info(YR,ALIVE,CID,camembert)
 
 	#### Competition for resources
-  HunterQualities<-as.numeric(lapply(pop[ALIVE],Hunting))
-  HunterQualities<-HunterQualities-2*min(HunterQualities)+mean(HunterQualities)
-  #HunterQualities<-rep(x=1/length(ALIVE),length(ALIVE))# here completely random. prob can introduce quality for competition
-  #HunterQualities<- abs(HuntingAlive - mean(HuntingAlive)) # here the most original individuals have a strong advantage in the competition (f-dpd selection)
+  #HunterQualities<-as.numeric(lapply(pop[ALIVE],Hunting))
+  #HunterQualities<-HunterQualities-2*min(HunterQualities)+mean(HunterQualities)
+  HunterQualities<-runif(n = length(ALIVE),min = 0,max = 1)
   if(length(HunterQualities)==1){HunterQualities=1}
   
   #podium<-table(factor(sample(as.character(ALIVE),size=camembert,replace=T,prob=HunterQualities),levels=ALIVE))
@@ -436,7 +440,7 @@ for(YR in 1:30){
 	
 	# We take a female based approach: we determine for each females 
 	from<-CID
-	pop[females]<-lapply(pop[females],Num_off)
+	pop[females]<-lapply(pop[females],FUN =Num_off)
 	for(i in females){
 		Noffs<-pop[[i]]@ARS
 		if(Noffs>0 & length(males>0)){
