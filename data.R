@@ -111,7 +111,7 @@ MeanCamembert<-5000
 SDCamembert<-1000
 
 lowBoundGrowth<-0.99 # minimal growth rate
-highBoundGrowth<-1.1 # maximal growth rate
+highBoundGrowth<-1.5 # maximal growth rate
 
 PlasticityBirthSize<-1
 PlasticityHunting<-0
@@ -193,7 +193,7 @@ for(L in 1:nbLoci)
 #vector of expected sizes for all ages:
 age<-1:20
 highBoundGrowthAge<-(highBoundGrowth+age-1)/age 
-Growth<-sapply(X = highBoundGrowthAge,FUN = function(x){mean(runif(1000,lowBoundGrowth,x))})
+Growth<-c(1,sapply(X = highBoundGrowthAge,FUN = function(x){mean(c(lowBoundGrowth,x))}))#with a 1 for the non-growth of the first year
 
 ####################################################
 ############### Definition of the class ############
@@ -300,7 +300,7 @@ bathtub<-function(age){
 # Incorporate the effect of size to the survival function
 sizeSurvival<-function(age,size,camemberts){
   
-  sizedeviation<-size-(MeanBirthSize*prod(Growth[1:age]))
+  sizedeviation<-size-(MeanBirthSize*prod(Growth[1:(age+1)]))
 
   p<-bathtub(age)
   if(p<1)#because size does not prevent animals of maximal age to die out
@@ -401,7 +401,7 @@ setMethod("Food","Leprechaun",function(Object,Camams){
 
 ############### Creating an initial population with 10 individuals
 pop<-c(new("Leprechaun"))
-for(i in 2:30){
+for(i in 2:100){
 	pop<-c(pop,new("Leprechaun"))
 }
 ############### Function for printing values
@@ -431,8 +431,10 @@ for(YR in 1:30){
   #HunterQualities<- abs(HuntingAlive - mean(HuntingAlive)) # here the most original individuals have a strong advantage in the competition (f-dpd selection)
   if(length(HunterQualities)==1){HunterQualities=1}
   
-  podium<-table(factor(sample(as.character(ALIVE),size=camembert,replace=T,prob=HunterQualities),levels=ALIVE))
-  camams<-as.numeric(podium[match(ALIVE,names(podium))])
+  #podium<-table(factor(sample(as.character(ALIVE),size=camembert,replace=T,prob=HunterQualities),levels=ALIVE))
+  #camams<-as.numeric(podium[match(ALIVE,names(podium))])
+  camams<-round(camembert*HunterQualities/sum(HunterQualities),digits = 0)
+  #pop[ALIVE]<-lapply(1:length(ALIVE), function(x) Food(pop[[ALIVE[x]]],camams[x]))
   pop[ALIVE]<-lapply(1:length(ALIVE), function(x) Food(pop[[ALIVE[x]]],camams[x]))
   
   #### Survival
