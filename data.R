@@ -350,12 +350,12 @@ setGeneric("Num_off",function(Object){standardGeneric("Num_off")})
 
 setMethod("Num_off","Leprechaun",function(Object){  
   lambda<-exp(log(MeanRepro)+fertilitySelection1*(Object@size-MeanBirthSize)/10+fertilitySelection2*((Object@size-MeanBirthSize)/10)^2
-                +camembertSelection*((Object@camemberts)^(1/3)-survivalPenaltyForRepro)/10)
+                +camembertSelection*((Object@camemberts)^(1/3))/10)
   repro<-rpois(n=1,lambda=lambda)+1
   
   logitV<-Object@age-SexualMaturity
   p<-1/(1+exp(-logitV))
-  Object@ARS<-as.integer(repro)*rbinom(1,size = 1,prob = p)*disaster[YR]
+  Object@ARS<-as.integer(repro)*rbinom(1,size = 1,prob = p)#*disaster[YR]
 	return(Object)
 })
 
@@ -387,7 +387,7 @@ ALIVE<-1:length(pop)
 
 cat("t\tID\tz\tbvs\thunting\tbvh\tC\ts\tARS\tage\tp1\tp2\tphi",file=filename,append=FALSE)
 
-disaster<-as.integer(rep(c(1,1,1),times = 1+StudyLength/3))
+#disaster<-as.integer(rep(c(1,1,1),times = 1+StudyLength/3))
 
 ############### The start of time
 for(YR in 1:StudyLength){
