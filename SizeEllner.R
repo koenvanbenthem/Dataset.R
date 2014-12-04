@@ -1,5 +1,7 @@
 setwd(dir="C:/Users/Timothée/Documents/GitHub/Dataset.R/Data/simple")
 popfile<-read.table(file="TheDataSetV0.csv",header=T)
+popfile<-popfile[which(popfile$t>10),]
+
 
 popfile$birthSize<-NA
 IDS<-unique(popfile$ID)
@@ -55,6 +57,8 @@ rm(list=ls())
 setwd("/home/koen/Dropbox/Decomposing pop dynamics/Koen/Coulson_Tulja_Sim")
 dat<-read.table(file="TheDataSetV0.csv",header=T)
 dat<-subset(dat,phi==1)
+dat<-subset(dat,t>10)
+
 frame<-aggregate(dat$z,by=list(dat$t),mean)
 colnames(frame)<-c('t','z')
 frame$a<-aggregate(dat$bvs,by=list(dat$t),mean)[,2]
@@ -101,8 +105,9 @@ z<-function(a,e,c){
 }
 
 framepje<-expand.grid(ai=c(0,1),ei=c(0,1),ci=c(0,1))
-framepje$a<-a(49*framepje$ai+1)
-framepje$e<-e(49*framepje$ei+1)
-framepje$k<-k(49*framepje$ci+1)
+framepje$a<-a(39*framepje$ai+11)
+framepje$e<-e(39*framepje$ei+11)
+framepje$k<-k(39*framepje$ci+11)
 framepje$z<-z(framepje$a,framepje$e,framepje$k)
-lm(z~ai+ei+ci,data=framepje)
+(mfinal<-lm(z~ai+ei+ci,data=framepje))
+abs(coef(mfinal))[-1]/sum(abs(coef(mfinal)[-1]))

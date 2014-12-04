@@ -8,7 +8,9 @@
 #######################%
 
 #######################%
-# Main object "Leprechaun": an individual of our species of interest, the Irish Leprechaun, small in size, but with great powers. To make it more French for Timothee, we assume that their favourite food is camembert. Leprechaun is not very choosy, and mates completely random.
+# Main object "Leprechaun": an individual of our species of interest, the Irish Leprechaun, small in size, but with great powers.
+#To make it more French for Timothee, we assume that their favourite food is camembert. 
+#Leprechaun is not very choosy, and mates completely random.
 ##########################################%
 
 # The object contains the following values
@@ -17,16 +19,6 @@
 #  V ID (unique identifier number) [integer]
 #  V pID (two numbers referring to the parents of the Leprechaun, if none: NA) [vector of two integers]
 #  V Year of birth (timestep at which the individual was born)	[integer]
-#  (- Genome (?) (two vectors of length N coding for both chromosomes of N loci in the genome.) [two vectors of N integers]
-#  - Heritable phenotypic trait value of interest (z) (e.g. birth weight) (changes/constant through life depending on trait)
-#  - (Possibly: breeding value A))
-#  - Rather simulate physically independent loci, otherwise we need to simulate recombination on the chromosomes. Over short time periods, 100 recombinations fragments (ie independent loci) sounds realistic.
-#  - Explicit coding of traits by many independent diploid loci. The simplest model: z = mean + sum_loci(a1_locus + a2_locus) + environment. One can add explicit dominance and epistasis, as well as interactions with environment. 
-#  - A possibility is to draw the a of the different alleles from a N(0,V). Each locus can have a different V, and thus a different importance. 
-#  - A large number of loci (>20) will give easily patterns expected from quantitative genetics. We can draw randomly the number of loci per trait. 
-#  - My main concern at the moment is the initialisation of the genetic diversity: it will be hard to avoid a fast decline of diversity at the beginning. One possibility is using neutral expectations of diversity (n-coalescent or Ewens distribution)
-#  - We probably do not need mutations if we consider a population over no more than some tens of generations.
-#  V Sex (M/F). Could be genetically determined by on locus, thus allowing random fluctuations of sex ratio and thus population structure.
 
 # Dynamic [these numbers do change after initialisation]
 #  V alive (boolean, true/false) [boolean]
@@ -56,12 +48,12 @@
 # - Start trait z distribution
 # - Start age (/stage) distribution
 # - Assign sexes to individuals
-# - (Possibly: start a values)
 
 ########## Perform in each time step the following actions over all alive individuals at t=0
 ## In following order:
 # survival(x,z)
 ### For those who survive:
+# aging(x)
 # growth(x,z)
 # p_repr(x,z)
 ### For those who reproduce:
