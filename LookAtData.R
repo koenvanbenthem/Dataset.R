@@ -1,5 +1,30 @@
-setwd(dir="/GitHub/Dataset.R")
-popfile<-read.table(file="pop.csv",header=T)
+setwd("C:/Users/Thimothee Admin/Dropbox/Decomposing pop dynamics/Dataset.R/")
+source("data.R")
+LeprechaunSimul(InitialPopSize = 100,MeanRepro = 2,StudyLength = 50,SurvivalPenaltyForRepro = 0.2)
+
+popfile<-read.table(file="data/simple/TheDataSetV1.csv",header=T)
+
+popfile2<-read.table(file="data/simple/TheDataSetV2.csv",header=T)
+
+plot(tapply(X = popfile$C[which(popfile$age>1)],INDEX = popfile$t[which(popfile$age>1)],mean),type="l")
+plot(popfile$C,x=popfile$t)
+popsize<-table(popfile$t)
+plot(popsize)
+plot(table(popfile$age))
+round(table(popfile$age)/(sum(table(popfile$age))),digits = 3)
+
+popsize2<-table(popfile2$t)
+plot(popsize2)
+plot(table(popfile2$age))
+round(table(popfile2$age)/(sum(table(popfile2$age))),digits = 3)
+plot(tapply(X = popfile2$C[which(popfile2$age>1)],INDEX = popfile2$t[which(popfile2$age>1)],mean),type="l")
+
+summary(glm(phi~1+age+I(age^2)+C,data=popfile))
+
+var(popfile$bvs[which(popfile$age==0 & popfile$t==2)])
+var(popfile$z[which(popfile$age==0 & popfile$t==2)])
+
+
 plot(popfile$z,x=popfile$age)
 
 plot(popfile$z,x=popfile$C)#size depending on how many Camemberts you (leprechaun) get, or the other way around rather
@@ -13,7 +38,6 @@ plot(popfile$bvh,x=popfile$t)
 
 mean(popfile$phi[which(popfile$t==8)])
 
-popsize<-table(popfile$t)
 
 library(lme4)
 mm0<-lmer(z~1+age+t+s+(1|ID),data=popfile)

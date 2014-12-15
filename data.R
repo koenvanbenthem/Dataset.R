@@ -8,9 +8,7 @@
 #######################%
 
 #######################%
-# Main object "Leprechaun": an individual of our species of interest, the Irish Leprechaun, small in size, but with great powers.
-#To make it more French for Timothee, we assume that their favourite food is camembert. 
-#Leprechaun is not very choosy, and mates completely random.
+# Main object "Leprechaun": an individual of our species of interest, the Irish Leprechaun, small in size, but with great powers. To make it more French for Timothee, we assume that their favourite food is camembert. Leprechaun is not very choosy, and mates completely random.
 ##########################################%
 
 # The object contains the following values
@@ -19,6 +17,16 @@
 #  V ID (unique identifier number) [integer]
 #  V pID (two numbers referring to the parents of the Leprechaun, if none: NA) [vector of two integers]
 #  V Year of birth (timestep at which the individual was born)	[integer]
+#  (- Genome (?) (two vectors of length N coding for both chromosomes of N loci in the genome.) [two vectors of N integers]
+#  - Heritable phenotypic trait value of interest (z) (e.g. birth weight) (changes/constant through life depending on trait)
+#  - (Possibly: breeding value A))
+#  - Rather simulate physically independent loci, otherwise we need to simulate recombination on the chromosomes. Over short time periods, 100 recombinations fragments (ie independent loci) sounds realistic.
+#  - Explicit coding of traits by many independent diploid loci. The simplest model: z = mean + sum_loci(a1_locus + a2_locus) + environment. One can add explicit dominance and epistasis, as well as interactions with environment. 
+#  - A possibility is to draw the a of the different alleles from a N(0,V). Each locus can have a different V, and thus a different importance. 
+#  - A large number of loci (>20) will give easily patterns expected from quantitative genetics. We can draw randomly the number of loci per trait. 
+#  - My main concern at the moment is the initialisation of the genetic diversity: it will be hard to avoid a fast decline of diversity at the beginning. One possibility is using neutral expectations of diversity (n-coalescent or Ewens distribution)
+#  - We probably do not need mutations if we consider a population over no more than some tens of generations.
+#  V Sex (M/F). Could be genetically determined by on locus, thus allowing random fluctuations of sex ratio and thus population structure.
 
 # Dynamic [these numbers do change after initialisation]
 #  V alive (boolean, true/false) [boolean]
@@ -48,12 +56,12 @@
 # - Start trait z distribution
 # - Start age (/stage) distribution
 # - Assign sexes to individuals
+# - (Possibly: start a values)
 
 ########## Perform in each time step the following actions over all alive individuals at t=0
 ## In following order:
 # survival(x,z)
 ### For those who survive:
-# aging(x)
 # growth(x,z)
 # p_repr(x,z)
 ### For those who reproduce:
@@ -73,17 +81,16 @@
 #set.seed(12)
 
 
-LeprechaunSimul<-function(DIR= "Data/simple",SurvivalSelection1=0.1,SurvivalSelection2=0,fertilitySelection1=0.1,fertilitySelection2=0,
-                          camembertSelection=0.1,SurvivalPenaltyForRepro=0.2,MeanCamembert=5000,SDCamembert=1000,
+LeprechaunSimul<-function(DIR= "Data/Simple",SurvivalSelection1=0.1,SurvivalSelection2=0,fertilitySelection1=0.1,fertilitySelection2=0,
+                          camembertSelection=0.1,SurvivalPenaltyForRepro=0.2,MeanCamembert=10000,SDCamembert=3000,
                           MeanBirthSize=10,lowBoundGrowth=0.99,highBoundGrowth=1.5,SexualMaturity=1,
                           PlasticityBirthSize=1,PlasticityHunting=0,MaternalEffect=0.1,MeanRepro=10,
-                          StudyLength=30,InitialPopSize=100){
+                          StudyLength=30,InitialPopSize=100,sizeSurvivalInflection=0){
   #folder<-"Simple"
   converter<-paste(DIR,"/conv.csv",sep="")
   #dir.create(file.path("Data", folder))
   cat("filename\tSS1\tSS2\tFS1\tFS2\tCAMSEL\tSDCAM",file=converter,append=FALSE)
-  
-#   
+  #   
 # SurvivalSelection1<-0.1 #linear coefficient on a logit scale for Survival ~ ... + size +size^2
 # SurvivalSelection2<-(0.0) #quadratic coefficient on a logit scale for Survival ~ ... + size + size^2; negative value=balancing selection
 # fertilitySelection1<-0.1 #linear coefficient on a log scale for reproduction ~ ... + size + size^2
@@ -101,6 +108,8 @@ LeprechaunSimul<-function(DIR= "Data/simple",SurvivalSelection1=0.1,SurvivalSele
 # SexualMaturity<-4 #the 50% reproductive size 
 # MeanBirthSize<-10
 # MeanRepro<-10
+#SurvivalPenaltyForRepro=0.2
+#sizeSurvivalInflection=0
 
 filename<-paste(DIR,"/pop_SS1_",SurvivalSelection1*10,"_SS2_",SurvivalSelection2*100,"_FS1_",fertilitySelection1*10,
                 "_FS2_",fertilitySelection2*100,"_CAMSEL_",camembertSelection*10,"_SDCAM_",SDCamembert,".csv",sep="")
@@ -252,13 +261,14 @@ setMethod("initialize","Leprechaun",function(.Object,parent1,parent2){#parent1 i
 ####################################################################################%
 
 ##### Implementing the famous bathtub, ages 1 to 20#####
-bathtub<-function(age){
-  p<-0.4*exp(-age/4)+(-1+exp(age*log(2)/20))
+bathtub<-function(age,shift=6,BaseMortality=0.1){
+  p<-BaseMortality*exp(-(age-shift)/4)+(-1+exp((age-shift)*log(2)/(20-shift)))
   p[p>1]<-1
   return(p)
 }
-
-
+#curve(expr =bathtub(x),0,20,add = F,ylim=c(0,1))
+#prod((1-bathtub(0:10)))
+#prod(sizeSurvival(0:10,size = 10,camemberts = 100,ARS =4))
 # Incorporate the effect of size to the survival function
 sizeSurvival<-function(age,size,camemberts,ARS){
   
@@ -268,11 +278,11 @@ sizeSurvival<-function(age,size,camemberts,ARS){
   if(p<1)#because size does not prevent animals of maximal age to die out
     {
       plogit<-log(p/(1-p))
-      Philogit<-plogit-SurvivalSelection1*(size-15)-SurvivalSelection2*(size-15)^2+ARS*SurvivalPenaltyForRepro
+      Philogit<-plogit-SurvivalSelection1*(size-sizeSurvivalInflection)-SurvivalSelection2*(size-sizeSurvivalInflection)^2+ARS*SurvivalPenaltyForRepro
       p<-exp(Philogit)/(1+exp(Philogit))
       if(camemberts<100)
         {
-          p<-1-(1-p)*(camemberts/100)
+          p<-1-(1-p)*(camemberts/100)^(1/2)
         }
     }
   return(1-p)
@@ -390,7 +400,7 @@ for(YR in 1:StudyLength){
 	#### Competition for resources
   #HunterQualities<-as.numeric(lapply(pop[ALIVE],Hunting))
   #HunterQualities<-HunterQualities-2*min(HunterQualities)+mean(HunterQualities)
-  HunterQualities<-runif(n = length(ALIVE),min = 0,max = 1)
+  HunterQualities<-runif(n = length(ALIVE),min = 0.5,max = 1)
   if(length(HunterQualities)==1){HunterQualities=1}
   
   #podium<-table(factor(sample(as.character(ALIVE),size=camembert,replace=T,prob=HunterQualities),levels=ALIVE))
